@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -12,23 +13,36 @@ int check_2(int n){
 }
 
 int check_in(int argc, char *argv[]){
-    int ret = 0;
+    int ret = 0; //i have it set up to specify which error it is. but we probably dont care all that much
+
     if (argc != 7){
         cerr << "error: invalid number of arguments" << endl;
         ret = 1;
     }
-    if (check_2(atoi(argv[1])) == 0){                 //should it be atoi or stoi check before submitting
-        cerr << "error: invalid number of sets" << endl;
-        ret = 0;
+
+    try {
+        if (check_2(atoi(argv[1])) == 0){                 //should it be atoi or stoi idk check before submitting
+            cerr << "error: invalid number of sets" << endl;
+            ret = 2;
+        }
+        if (check_2(atoi(argv[2])) == 0){
+            cerr << "error: invalid number of blocks" << endl;
+            ret = 3;
+        }
+        if (check_2(atoi(argv[3])) == 0){
+            cerr << "error: invalid number of words" << endl;
+            ret = 4;
+        }
     }
-    if (check_2(atoi(argv[2])) == 0){
-        cerr << "error: invalid number of blocks" << endl;
-        ret = 0;
+    catch (invalid_argument e) {
+        cerr << "error: invalid argument" << endl;
+        ret = 5;
     }
-    if (check_2(atoi(argv[3])) == 0){
-        cerr << "error: invalid number of words" << endl;
-        ret = 0;
+    catch (out_of_range e) {
+        cerr << "error: out of range" << endl;
+        ret = 6;
     }
+    
     return ret;
 }
 
@@ -44,13 +58,9 @@ int main(int argc, char *argv[]){
 
 
     //check if command line input is valid
-    if (!check_in(argc)){
+    if (check_in(argc, argv)){
         return 1;
     }
-
-
-
-
     
     int total_loads = 0;
     int total_stores = 0;
