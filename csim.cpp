@@ -1,3 +1,4 @@
+#include "csim_funcs.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -6,8 +7,20 @@
 
 using namespace std;
 
-int main()
-{
+int main(int argc, char **argv) {
+
+    if (argc != 7) {
+        cerr << "Usage: ./csim num_sets num_blocks num_bytes write/no_write write_through/back eviction" << endl;
+        return 1;
+    } else if (has_invalid_param(argc, argv)) {
+        return 2;
+    }
+
+    
+
+
+
+
     
     int total_loads;
     int total_stores = 0;

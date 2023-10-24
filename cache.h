@@ -56,10 +56,17 @@ class cache {
 
     void init_sets();
 
-    
+    /* Functions to calculate the sizes of the bits */
 
+    void calc_tag_bits();
 
+    void calc_offset_bits();
 
+    void calc_index_bits();
+
+    /* Functions to read and write to memory */
+
+    /* Return set if it is a hit. Otherwise, return null. */
 
 };
 
