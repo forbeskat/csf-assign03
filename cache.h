@@ -1,6 +1,7 @@
 #ifndef BASE_CACHE
 #define BASE_CACHE
 
+#include <cstdint>
 #include <vector>
 #include "sets_and_slots.h"
 
@@ -17,5 +18,49 @@ using std::vector;
 *  The base class implementation will include ~virtual functions for trace read/writes.
 *  The base class implementation will include ~virtual functions for total_loads, total_stores, etc...
 */
+
+class cache {
+    public:
+
+    /* Constructor for new cache */
+    cache(uint32_t num_sets, uint32_t num_blocks_per_set, uint32_t num_bytes_in_block, bool is_lru);
+
+    virtual ~cache();
+
+    /* Process the trace-line by dividing it into the tag, index, etc. */
+    void process_trace_line(uint32_t traceline, bool read_no_write);
+
+    int total_loads;
+    int total_stores;
+    int load_hits;
+    int load_misses;
+    int store_hits;
+    int store_misses;
+    int total_cycles;
+
+    /* Initialize cache members */
+
+    Cache newCache;
+
+    int num_sets;
+    int num_blocks_per_set;
+    int num_bytes_per_block;
+    bool is_lru; // else, FIFO
+
+    int num_index_bits;
+    int num_tag_bits;
+    int num_offset_bits;
+    uint32_t curr_time;
+
+    /* Initialize all set objs */
+
+    void init_sets();
+
+    
+
+
+
+
+};
 
 #endif
