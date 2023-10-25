@@ -35,18 +35,17 @@ cache::~cache() {
     sets.clear(); // Clear the vector of Sets
 }
 
-
-/* For this cache, calculate and init number of offset bits in each trace */
+// Calculate offset bits
 void cache::calc_offset_bits() {
     this->num_offset_bits = log2(num_bytes_per_block); 
 }
 
-/* For this cache, calculate and init number of index bits in each trace */
+// Calculate index bits
 void cache::calc_index_bits() {
     this->num_index_bits = log2(num_sets);
 }
 
-/* For this cache, calculate and init number of tag bits in each trace */
+// The rest are tag bits
 void cache::calc_tag_bits() {
     this->num_tag_bits = 32 - this->num_offset_bits - this->num_index_bits;
 }
@@ -67,4 +66,14 @@ void cache::process_trace_line(uint32_t trace, bool read) {
         write_trace(index, tag);
     }
     curr_time++;
+}
+
+/* Given a trace, find the the integer value of its index region */
+int cache::get_index_from_trace(uint32_t trace) {
+    return (trace >> this->num_offset_bits) & ((1 << this->num_index_bits) - 1);
+}
+
+/* Given a trace, find the the integer value of its tag region */
+int cache::get_tag_from_trace(uint32_t trace) {
+    return trace >> num_offset_bits >> num_index_bits;
 }
