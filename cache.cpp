@@ -34,3 +34,37 @@ cache::~cache() {
     }
     sets.clear(); // Clear the vector of Sets
 }
+
+
+/* For this cache, calculate and init number of offset bits in each trace */
+void cache::calc_offset_bits() {
+    this->num_offset_bits = log2(num_bytes_per_block); 
+}
+
+/* For this cache, calculate and init number of index bits in each trace */
+void cache::calc_index_bits() {
+    this->num_index_bits = log2(num_sets);
+}
+
+/* For this cache, calculate and init number of tag bits in each trace */
+void cache::calc_tag_bits() {
+    this->num_tag_bits = 32 - this->num_offset_bits - this->num_index_bits;
+}
+
+/**
+ * Start the process by converting the 32 bit trace into a tag, index.
+ * This method should the read or write method.
+ */
+void cache::process_trace_line(uint32_t trace, bool read) {
+    int index = get_index_from_trace(trace);
+    int tag = get_tag_from_trace(trace);
+    
+    // std::cout << "Tag: " << tag << ", Index: " << index << std::endl;  
+    
+    if (read) {
+        read_trace(index, tag);
+    } else {
+        write_trace(index, tag);
+    }
+    curr_time++;
+}
