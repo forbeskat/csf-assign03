@@ -23,10 +23,9 @@ int loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int of
 
 void noWriteAllocate(int* totalCycles);
 
-/**
-     *  Given a tag and index, return the corresponding set if it's 
-     *  a hit in the cache. If it's a miss, return a null object. 
-*/
 bool trace_is_a_hit(uint32_t tag, uint32_t index);
+
+void read_trace(uint32_t index, uint32_t tag);
+
 
 #endif

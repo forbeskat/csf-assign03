@@ -7,6 +7,8 @@
 
 using namespace std;
 
+// Note: write = store, read = load
+
 int main(int argc, char **argv) {
 
     if (argc != 7) {
@@ -16,12 +18,6 @@ int main(int argc, char **argv) {
         return 2;
     }
 
-    
-
-
-
-
-    
     int total_loads;
     int total_stores = 0;
     int load_hits = 0;

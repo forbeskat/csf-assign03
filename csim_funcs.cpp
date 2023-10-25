@@ -85,7 +85,7 @@ Cache init_cache(char **argv) {
 }
 
 int loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int offset) {
-
+    return 1;
 }
 
 // Tag identifies the data block
@@ -107,4 +107,10 @@ bool trace_is_a_hit(Cache* cache, uint32_t tag, uint32_t index) {
 
     // Cache miss: The data with the specified tag is not found in the cache set
     return false;
+}
+
+void read_trace(Cache* cache, uint32_t index, uint32_t tag) {
+    if (trace_is_a_hit(cache, index, tag)) {
+        
+    }
 }
