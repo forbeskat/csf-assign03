@@ -83,3 +83,28 @@ Cache init_cache(char **argv) {
 
     return cache;
 }
+
+int loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int offset) {
+
+}
+
+// Tag identifies the data block
+// Index determines the set to find the data in
+bool trace_is_a_hit(Cache* cache, uint32_t tag, uint32_t index) {
+    // Check if the cache set at the specified index is empty
+    if (cache->sets[index].slots.empty()) {
+        // Cache miss: The set is empty, so there can be no hits
+        return false;
+    }
+
+    // Iterate through the slots in the cache set
+    for (const Slot& slot : cache->sets[index].slots) {
+        if (slot.valid && slot.tag == tag) {
+            // Cache hit: The data with the specified tag is found in the cache set
+            return true;
+        }
+    }
+
+    // Cache miss: The data with the specified tag is not found in the cache set
+    return false;
+}

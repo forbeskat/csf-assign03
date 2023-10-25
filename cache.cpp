@@ -21,10 +21,7 @@ cache::cache(uint32_t num_sets, uint32_t num_blocks_per_set, uint32_t num_bytes_
     this->total_cycles = 0;
     this->curr_time = 0;
 
-    init_sets();
-    calc_index_bits();
-    calc_tag_bits();
-    calc_offset_bits();
+
 };
 
 // Destructor for the Cache class
@@ -33,21 +30,6 @@ cache::~cache() {
         set.slots.clear(); // Clear the vector of slots in each Set
     }
     sets.clear(); // Clear the vector of Sets
-}
-
-// Calculate offset bits
-void cache::calc_offset_bits() {
-    this->num_offset_bits = log2(num_bytes_per_block); 
-}
-
-// Calculate index bits
-void cache::calc_index_bits() {
-    this->num_index_bits = log2(num_sets);
-}
-
-// The rest are tag bits
-void cache::calc_tag_bits() {
-    this->num_tag_bits = 32 - this->num_offset_bits - this->num_index_bits;
 }
 
 /**
