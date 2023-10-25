@@ -27,3 +27,10 @@ cache::cache(uint32_t num_sets, uint32_t num_blocks_per_set, uint32_t num_bytes_
     calc_offset_bits();
 };
 
+// Destructor for the Cache class
+cache::~cache() {
+    for (Set& set : sets) {
+        set.slots.clear(); // Clear the vector of slots in each Set
+    }
+    sets.clear(); // Clear the vector of Sets
+}

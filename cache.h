@@ -93,6 +93,9 @@ protected:
     
     virtual void write_trace(uint32_t index, uint32_t tag) = 0;
     
+    private:
+
+    std::vector<Set> sets;
 
 };
 
