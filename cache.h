@@ -38,6 +38,7 @@ class cache {
     int store_misses;
     int total_cycles;
 
+protected:
     /* Initialize cache members */
 
     Cache newCache;
@@ -66,7 +67,32 @@ class cache {
 
     /* Functions to read and write to memory */
 
-    /* Return set if it is a hit. Otherwise, return null. */
+    // Returns an integer value for the index of a tag
+    int get_tag_from_trace(uint32_t trace);
+
+    // Returns an integer value for the index of a trace
+    int get_index_from_trace(uint32_t trace);
+
+    Slot create_slot(uint32_t tag);
+
+    bool trace_is_a_hit(uint32_t tag, uint32_t index);
+    
+    // Detect if the target set has an open slot
+    bool has_open_slot(Set* target_set);
+    
+    // Helper function to find LRU tag
+    uint32_t get_lru_tag(Set *set);
+    
+    uint32_t find_tag_to_be_evicted(Set* target_set);
+
+    virtual void evict_trace(Set* set, uint32_t tag) = 0;
+    
+    void read_trace(uint32_t index, uint32_t tag);
+    
+    void load_trace_from_mem(Set* set, uint32_t tag);
+    
+    virtual void write_trace(uint32_t index, uint32_t tag) = 0;
+    
 
 };
 
