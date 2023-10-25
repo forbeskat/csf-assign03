@@ -58,8 +58,6 @@ void cache::process_trace_line(uint32_t trace, bool read) {
     int index = get_index_from_trace(trace);
     int tag = get_tag_from_trace(trace);
     
-    // std::cout << "Tag: " << tag << ", Index: " << index << std::endl;  
-    
     if (read) {
         read_trace(index, tag);
     } else {

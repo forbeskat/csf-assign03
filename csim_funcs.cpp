@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -51,7 +52,7 @@ bool not_power_of_two(int num) {
     return (num & (num - 1)) != 0;
 }
 
-Cache* init_cache(char **argv) {
+Cache init_cache(char **argv) {
     int sets = stoi(argv[1]);
     int blocks = stoi(argv[2]);
     int bytes_in_block = stoi(argv[3]);
@@ -59,18 +60,26 @@ Cache* init_cache(char **argv) {
     std::string write_through = argv[5];
     std::string eviction = argv[6];
 
-    Cache* new_cache;
+    int indexSize = log2(sets);
+    int offsetSize = log2(blocks);
+    unsigned int tagSize = 32 - indexSize - offsetSize;
 
-    if (allocation == "write-allocate" && write_through == "write_through") {
-        new_cache;
-    } else if (allocation == "write-allocate" && write_through == "write-back") {
-        new_cache;
-    } else if (allocation == "no-write-allocate" && write_through == "write_through") {
-        new_cache;
-    } else {
-        // Theoretically, these params have been checked and pointer should never be NULL.
-        return NULL;
+    Cache cache;
+    cache.sets.resize(sets);
+
+    for (unsigned int i = 0; i < sets; i++) {
+        cache.sets[i].slots.resize(blocks);
     }
 
-    return new_cache;
+    if (allocation == "write-allocate" && write_through == "write_through") {
+        // allocate cache
+    } else if (allocation == "write-allocate" && write_through == "write-back") {
+        // allocate cache
+    } else if (allocation == "no-write-allocate" && write_through == "write_through") {
+        // allocate cache
+    } else {
+        // Theoretically, these params have been checked.
+    }
+
+    return cache;
 }

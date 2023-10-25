@@ -11,6 +11,8 @@ bool has_invalid_param(int argc, char **argv);
 bool not_power_of_two(int num);
 
 /* Initialize the cache according to the configurations given by user */
-Cache* init_cache(char **argv);
+Cache init_cache(char **argv);
+
+
 
 #endif
