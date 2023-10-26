@@ -19,6 +19,6 @@ $(EXECUTABLE): $(OBJS)
 clean:
 	rm -f $(OBJS) $(EXECUTABLE)
 
-solution.zip:
-	rm -f solution.zip
-	zip solution.zip Makefile README.txt *.h *.cpp
+assign03.zip:
+	rm -f assign03.zip
+	zip assign03.zip Makefile README.txt *.h *.cpp
