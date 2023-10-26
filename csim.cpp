@@ -1,6 +1,7 @@
 #include "csim_funcs.h"
 #include <iostream>
 #include <fstream>
+#include <math.h>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -18,9 +19,9 @@ int main(int argc, char **argv) {
         return 2;
     }
 
-    Cache new_cache = init_cache(argv);
+    Cache cache = init_cache(argv);
 
-    int total_loads;
+    int total_loads = 0;
     int total_stores = 0;
     int load_hits = 0;
     int load_misses = 0;
@@ -28,28 +29,55 @@ int main(int argc, char **argv) {
     int store_misses = 0;
     int total_cycles = 0;
 
+    int sets = stoi(argv[1]);
+    int blocks = stoi(argv[2]); // blocks = slotsSize
+    int bytes_in_block = stoi(argv[3]); // blockSize
+    const char* wHit = argv[4];
+    const char* sMiss = argv[5];
+    std::string eviction = argv[6];
+    int indexSize = log2(sets);
+    int offsetSize = log2(blocks);
+    unsigned int tagSize = 32 - indexSize - offsetSize;
+
+    unsigned int maxTag = (1 << tagSize) - 1;
+    unsigned int maxIndex = (1 << indexSize) - 1;
 
     string line;
 
+    // dirty for write through or evict
+    // increment total cycles
+
+    int counter = 0;
     while(getline(cin, line)) {
         istringstream iss(line);
-        string field1;
-        string address;
-        string someotherstuff; //come back to this thing in part 2
-        
+        string ls;
+        unsigned int address;
+        char r_w;
+
         //read in a file with the format
         // (l or s) (address) (some other stuff)
-        iss >> field1 >> address >> someotherstuff ;
+        iss >> ls >> address;
 
-        if (field1 == "l"){ //loading
-            //
-        } else if (field1 == "s"){ //storing
+        unsigned int tag = (address >> indexSize) & maxTag;
+        unsigned int index = address & maxIndex;
+
+        if (!(iss >> r_w >> std::hex >> address)) {
+            std::cerr << "Error parsing line: " << line << std::endl;
+            continue;
+        }
+
+        if (ls == "l"){ //loading
+            total_loads++;
+            if (trace_is_a_hit(&cache, tag, index)) { // memory in cache
+                loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, wHit);
+            }
+        } else if (ls == "s"){ //storing
             //
         } else {
             cout << "error: invalid input" << endl;
         }
 
-
+        counter++;
     }
 
     return 0;

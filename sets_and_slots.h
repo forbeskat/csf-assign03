@@ -5,13 +5,12 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <stdint.h>
 
 using std::vector;
 
 struct Slot {
-    uint32_t tag = 0;
-    uint32_t load_ts, access_ts; // timestamps
+    unsigned int tag = 0;
+    unsigned int load_ts, access_ts; // timestamps
     bool valid = false;
     bool dirty = false;
 };
@@ -22,13 +21,13 @@ struct Set {
 
 struct Cache {
     vector<Set> sets;
-    std::map<std::string, int> tracker;
-    int num_sets;
-    int num_blocks_per_set;
-    int num_bytes_per_block;
-    bool is_write_allocate;
-    bool is_write_through;
-    bool is_lru; // else, FIFO
+    // std::map<std::string, int> tracker;
+    // int num_sets;
+    // int num_blocks_per_set;
+    // int num_bytes_per_block;
+    // bool is_write_allocate;
+    // bool is_write_through;
+    // bool is_lru; // else, FIFO
 };
 
 #endif
