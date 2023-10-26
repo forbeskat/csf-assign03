@@ -18,6 +18,8 @@ int main(int argc, char **argv) {
         return 2;
     }
 
+    Cache new_cache = init_cache(argv);
+
     int total_loads;
     int total_stores = 0;
     int load_hits = 0;
@@ -46,6 +48,8 @@ int main(int argc, char **argv) {
         } else {
             cout << "error: invalid input" << endl;
         }
+
+
     }
 
     return 0;

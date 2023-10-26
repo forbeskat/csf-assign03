@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -71,6 +72,21 @@ Cache init_cache(char **argv) {
         cache.sets[i].slots.resize(blocks);
     }
 
+    cache.num_sets = sets;
+    cache.num_blocks_per_set = blocks;
+    cache.num_bytes_per_block = bytes_in_block;
+
+    cache.is_write_allocate = (strcmp(argv[4], "write-allocate") == 0);
+    cache.is_write_through = (strcmp(argv[5], "write-through") == 0);
+    cache.is_lru = ((strcmp(argv[6], "lru") == 0));
+
+    cache.tracker["total_loads"] = 0;
+    cache.tracker["total_stores"] = 0;
+    cache.tracker["load_hits"] = 0;
+    cache.tracker["store_hits"] = 0;
+    cache.tracker["store_misses"] = 0;
+    cache.tracker["total_cycles"] = 0;
+
     if (allocation == "write-allocate" && write_through == "write_through") {
         // allocate cache
     } else if (allocation == "write-allocate" && write_through == "write-back") {
@@ -111,6 +127,6 @@ bool trace_is_a_hit(Cache* cache, uint32_t tag, uint32_t index) {
 
 void read_trace(Cache* cache, uint32_t index, uint32_t tag) {
     if (trace_is_a_hit(cache, index, tag)) {
-        
+        cache->tracker["load_hits"]++;
     }
 }
