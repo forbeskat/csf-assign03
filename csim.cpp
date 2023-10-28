@@ -8,10 +8,6 @@
 
 using namespace std;
 
-
-
-
-
 // Note: write = store, read = load
 
 int main(int argc, char **argv) {
@@ -36,8 +32,8 @@ int main(int argc, char **argv) {
     int sets = stoi(argv[1]);
     int blocks = stoi(argv[2]); // blocks = slotsSize
     int bytes_in_block = stoi(argv[3]); // blockSize
-    const char* wHit = argv[4];
-    const char* sMiss = argv[5];
+    const char* allocation = argv[4];
+    const char* write_through = argv[5];
     std::string eviction = argv[6];
     int indexSize = log2(sets);
     int offsetSize = log2(blocks);
@@ -54,13 +50,13 @@ int main(int argc, char **argv) {
     int counter = 0;
     while(getline(cin, line)) {
         istringstream iss(line);
-        string ls;
+        string l_or_s;
         unsigned int address;
         char r_w;
 
         //read in a file with the format
         // (l or s) (address) (some other stuff)
-        iss >> ls >> address;
+        iss >> l_or_s >> address;
 
         unsigned int tag = (address >> indexSize) & maxTag;
         unsigned int index = address & maxIndex;
@@ -70,19 +66,32 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        if (ls == "l"){ //loading
+        if (l_or_s == "l"){ // loading
             total_loads++;
             if (trace_is_a_hit(&cache, tag, index)) { // memory in cache
-                //loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, wHit);
+                loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block);
             }
-        } else if (ls == "s"){ //storing
-            //
+        } else if (l_or_s == "s"){ // storing
+            total_stores++;
+            if (trace_is_a_hit(&cache, tag, index)) { // memory in cache
+                total_cycles++;
+                storeHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, allocation, counter);
+            } else  {
+                storeMiss(&cache, index, tag, blocks, &total_cycles, bytes_in_block, write_through);
+            }
         } else {
             cout << "error: invalid input" << endl;
         }
 
         counter++;
     }
+
+    cout << "Total loads: " << total_loads << endl;
+    cout << "Load hits: " << load_hits << endl;
+    cout << "Load misses: " << load_misses << endl;
+    cout << "Store hits: " << store_hits << endl;
+    cout << "Store misses: " << store_misses << endl;
+    cout << "Total cycles: " << total_cycles << endl;
 
     return 0;
 }

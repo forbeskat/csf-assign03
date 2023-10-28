@@ -11,7 +11,8 @@ using namespace std;
 
 struct Slot {
     unsigned int tag = 0;
-    unsigned int load_ts, access_ts; // timestamps
+    unsigned int access_ts = 0; // timestamps
+    unsigned int load_ts = 0;
     bool valid = false;
     bool dirty = false;
 };
@@ -22,16 +23,9 @@ struct Set {
 
 struct Cache {
     vector<Set> sets;
-    // std::map<std::string, int> tracker;
-    // int num_sets;
-    // int num_blocks_per_set;
-    // int num_bytes_per_block;
-    // bool is_write_allocate;
-    // bool is_write_through;
-    // bool is_lru; // else, FIFO
+    int numslots;
+    int numsets;
 };
-
-
 
 /* Check if parameters are valid */
 bool has_invalid_param(int argc, char **argv);
@@ -42,19 +36,27 @@ bool not_power_of_two(int num);
 /* Initialize the cache according to the configurations given by user */
 Cache init_cache(char **argv);
 
-bool loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block, const char* wHit);
+bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index);
 
-void writeThrough(int* totalCycles);
+bool storeHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block, const char* wHit, unsigned int loopCounter);
 
-void writeBack(Cache* cache, unsigned int index, unsigned int tag, unsigned int offset);
+bool loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block);
 
-int loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int offset);
+void writeBack(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block);
+
+bool storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block, const char *wMiss);
+
+bool loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block, const char* wMiss);
+
+void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int loopCounter);
 
 void noWriteAllocate(int* totalCycles);
 
-bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index);
+void writeThrough(int* totalCycles);
 
-void read_trace(unsigned int index, unsigned int tag);
+void evict(Cache *cache, unsigned int tag, unsigned int loopCounter);
+
+// void read_trace(unsigned int index, unsigned int tag);
 
 
 #endif
