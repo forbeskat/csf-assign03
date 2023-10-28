@@ -86,7 +86,8 @@ int main(int argc, char **argv) {
         counter++;
     }
 
-    cout << "Total loads: " << total_loads << endl;
+    cout << "Total loads: " << total_loads << endl; // Correct
+    cout << "Total stores: " << total_stores << endl;
     cout << "Load hits: " << load_hits << endl;
     cout << "Load misses: " << load_misses << endl;
     cout << "Store hits: " << store_hits << endl;

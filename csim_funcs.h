@@ -25,7 +25,7 @@ struct Cache {
     vector<Set> sets;
     int numslots;
     int numsets;
-    int counter=0;
+    int counter = 0;
 };
 
 /* Check if parameters are valid */
