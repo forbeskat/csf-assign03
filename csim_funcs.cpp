@@ -182,14 +182,22 @@ bool loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int sl
             // increase total cycles when eviction occurs to account for the write back to memory
         }
     }
+
+
+
+
+
+
+    return true;
 }
 
 // Load -> memory not found in cache. This means that memory needs to be brought to the cache and then memory needs to be stored to the cache.
 bool loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block, const char* wMiss) {
     *total_cycles += (100 * bytes_in_block / 4);
     // Create a new slot by replacing an invalid block in the cache
-
     
+    //evict(Cache *cache, unsigned int tag, unsigned int loopCounter)
+    return true; //placeholder
     
 }
 
@@ -224,10 +232,14 @@ vector<int> findLRU(Cache *cache, int loop_counter) {
     return lru;
 }
 
-void evict(Cache *cache, unsigned int tag, unsigned int loop_counter) {
+void evict(Cache *cache, unsigned int tag, unsigned int loop_counter) { //evict and replace
     vector<int> lru= findLRU(cache, loop_counter);
     cache->sets[lru.at(0)].slots[lru.at(1)].valid = true;
     cache->sets[lru.at(0)].slots[lru.at(1)].tag = tag;
     cache->sets[lru.at(0)].slots[lru.at(1)].access_ts = loop_counter;
     cache->sets[lru.at(0)].slots[lru.at(1)].dirty = true;
+}
+
+void set_counter(Cache* cache, unsigned int counter) {
+    cache->counter = counter;
 }

@@ -25,6 +25,7 @@ struct Cache {
     vector<Set> sets;
     int numslots;
     int numsets;
+    int counter=0;
 };
 
 /* Check if parameters are valid */
@@ -55,6 +56,8 @@ void noWriteAllocate(int* totalCycles);
 void writeThrough(int* totalCycles);
 
 void evict(Cache *cache, unsigned int tag, unsigned int loopCounter);
+
+void set_counter(Cache* cache, unsigned int counter);
 
 // void read_trace(unsigned int index, unsigned int tag);
 
