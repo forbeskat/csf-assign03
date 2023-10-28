@@ -1,24 +1,17 @@
-CC = g++
-CFLAGS = -g -Wall -Wextra -pedantic -std=c++11
+CFLAGS = -g -std=c++11 -Wall -Wextra -pedantic
 
-SRCS = cache.cpp
-OBJS = $(SRCS:.cpp=.o)
+cache: csim.o csim_funcs.o
+	g++ $(CFLAGS) -o cache csim.o csim_funcs.o
 
-EXECUTABLE = csim
+csim_funcs.o: csim_funcs.cpp csim_funcs.h
+	g++ $(CFLAGS) -c csim_funcs.cpp
+	
+csim.o: csim.cpp 
+	g++ $(CFLAGS) -c csim.cpp
 
-# Targets
-
-all: $(EXECUTABLE)
-
-$(EXECUTABLE): $(OBJS)
-	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJS)
-
-%.o: %.cpp
-	$(CC) $(CFLAGS) -c $< -o $@
+assign03.zip :
+	rm -f assign03.zip
+	zip -9r $@ Makefile README.txt csim.cpp csim_funcs.cpp csim_funcs.h
 
 clean:
-	rm -f $(OBJS) $(EXECUTABLE)
-
-assign03.zip:
-	rm -f assign03.zip
-	zip assign03.zip Makefile README.txt *.h *.cpp
+	rm -f *.o cache assign03.zip

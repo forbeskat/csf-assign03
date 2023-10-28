@@ -2,9 +2,36 @@
 #define CSIM_FUNCS
 
 #include <string>
-#include "sets_and_slots.h"
+#include <iostream>
+#include <map>
+#include <vector>
+//#include "sets_and_slots.h"
 
 using namespace std;
+
+struct Slot {
+    unsigned int tag = 0;
+    unsigned int load_ts, access_ts; // timestamps
+    bool valid = false;
+    bool dirty = false;
+};
+
+struct Set {
+    std::vector<Slot> slots;
+};
+
+struct Cache {
+    vector<Set> sets;
+    // std::map<std::string, int> tracker;
+    // int num_sets;
+    // int num_blocks_per_set;
+    // int num_bytes_per_block;
+    // bool is_write_allocate;
+    // bool is_write_through;
+    // bool is_lru; // else, FIFO
+};
+
+
 
 /* Check if parameters are valid */
 bool has_invalid_param(int argc, char **argv);

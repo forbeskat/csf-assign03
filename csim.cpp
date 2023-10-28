@@ -8,6 +8,10 @@
 
 using namespace std;
 
+
+
+
+
 // Note: write = store, read = load
 
 int main(int argc, char **argv) {
@@ -69,7 +73,7 @@ int main(int argc, char **argv) {
         if (ls == "l"){ //loading
             total_loads++;
             if (trace_is_a_hit(&cache, tag, index)) { // memory in cache
-                loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, wHit);
+                //loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, wHit);
             }
         } else if (ls == "s"){ //storing
             //
