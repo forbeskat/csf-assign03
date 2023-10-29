@@ -112,8 +112,11 @@ Cache init_cache(char **argv) {
 // Index determines the set to find the data in
 bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index) {
     // Check if the cache set at the specified index is empty
+    //string here = cache->sets[index].slots[0].valid ? "true" : "false";
+    //cout<<here<<endl;
     if (cache->sets[index].slots.empty()) {
         // Cache miss: The set is empty, so there can be no hits
+        
         return false;
     }
 
@@ -178,7 +181,7 @@ void writeBack(Cache *cache, unsigned int index, unsigned int tag, unsigned int 
 bool loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block) {
     for (unsigned int i = 0; i < slotSize; i++) {
         if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
-            cache->sets[index].slots[i].access_ts = 0; //UPDATE ACCESS TIMESTAMP;
+            cache->sets[index].slots[i].access_ts = cache->counter; //UPDATE ACCESS TIMESTAMP;
             // increase total cycles when eviction occurs to account for the write back to memory
         }
     }
