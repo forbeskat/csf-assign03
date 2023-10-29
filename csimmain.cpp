@@ -38,7 +38,6 @@ int main(int argc, char **argv) {
     int indexSize = log2(sets);
     int offsetSize = log2(blocks);
     unsigned int tagSize = 32 - indexSize - offsetSize;
-
     unsigned int maxTag = (1 << tagSize) - 1;
     unsigned int maxIndex = (1 << indexSize) - 1;
 
@@ -75,9 +74,9 @@ int main(int argc, char **argv) {
         int bits_index = log2(sets);
         int bits_offset = log2(blocks);
         int bits_tag = 32 - bits_index - bits_offset;
-
         unsigned int tag = address >> (bits_index +bits_offset);
         unsigned int index = (address << bits_tag) >> (bits_offset + bits_tag); 
+        
         if (bits_offset + bits_tag == 32) {
             index = 0;
         }   

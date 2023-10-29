@@ -123,10 +123,10 @@ bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned
         if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
             cache->sets[index].slots[i].access_ts = loopCounter; //UPDATE ACCESS TIMESTAMP;
             //cout<<cache->sets[index].slots[i].tag<<endl;
+            
             return true;
         }
     }
-
     // Cache miss: The data with the specified tag is not found in the cache set
     return false;
 }
@@ -156,12 +156,12 @@ void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int 
     *store_misses = *store_misses + 1;
     if (strcmp(wMiss, "write-allocate") == 0) {
         // we bring the relevant memory block into the cache before the store proceeds, takes 100 processor cycles
-        *total_cycles = *total_cycles + (100 * bytes_in_block / 4);
+        *total_cycles = *total_cycles + ((100 * bytes_in_block / 4) / 4);
         // put into a new slot, write it into the cache
-        checkForOpenSlot(cache, index, tag, slotSize, loopCounter);
+        checkForOpenSlot(cache, index, tag, slotSize, total_cycles, loopCounter);
         // *total_cycles = *total_cycles + 1;
         if (strcmp(wHit, "write-through") == 0) {
-            *total_cycles = *total_cycles + (100 * bytes_in_block / 4);
+            *total_cycles = *total_cycles + ((100 * bytes_in_block / 4) / 4);
         } else if (strcmp(wHit, "write-back") == 0) {
             writeBack(cache, index, tag, slotSize, total_cycles, bytes_in_block);
         }
@@ -200,56 +200,72 @@ void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int s
     *total_cycles = *total_cycles + (100 * bytes_in_block / 4);
     *load_misses = *load_misses + 1;
     // Create a new slot by replacing an invalid block in the cache
-    checkForOpenSlot(cache, index, tag, slotSize, loopCounter);
+    checkForOpenSlot(cache, index, tag, slotSize, total_cycles, loopCounter);
     // *total_cycles = *total_cycles + 1;
 }
 
-void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int loopCounter) {
+void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int * total_cycles, unsigned int loopCounter) {
     // If slot is availble, add it to the cache
     for (unsigned int i = 0; i < slotSize; i++) {
         if (cache->sets[index].slots[i].valid == false) {
             cache->sets[index].slots[i].valid = true;
             cache->sets[index].slots[i].tag = tag;
             cache->sets[index].slots[i].access_ts = loopCounter;
+            cache->sets[index].slots[i].dirty = false;
             return;
         }
     }
 
     // If there is no slot available, we need to evict one and replace it
-    evict(cache, tag, loopCounter);
+    evict(cache, index, tag, slotSize, total_cycles, loopCounter);
 }
 
 // vector<int> findFIFO(Cache *cache, unsigned int loop_counter) {
 //     return NULL;
 // }
 
-vector<int> findLRU(Cache *cache, unsigned int loop_counter) {
-    vector<int> lru(3); //set index, slot index, access timemstap
-    lru.at(2) = loop_counter;
-    for (int i =0; i< cache->numsets; i++){
-        for (int j =0; j<cache->numslots; j++){
-            if ((int)(cache->sets[i].slots[j].access_ts) < lru.at(2)){
-                lru.at(0)= i;
-                lru.at(1)= j;
-                lru.at(2)= cache->sets[i].slots[j].access_ts; //least access ts is the lru
-            }
-        }
-    }
-    return lru;
-}
+// vector<int> findLRU(Cache *cache, unsigned int loop_counter) {
+//     vector<int> lru(3); //set index, slot index, access timemstap
+//     lru.at(2) = loop_counter;
+//     for (int i =0; i< cache->numsets; i++){
+//         for (int j =0; j<cache->numslots; j++){
+//             if ((int)(cache->sets[i].slots[j].access_ts) < lru.at(2)){
+//                 lru.at(0)= i;
+//                 lru.at(1)= j;
+//                 lru.at(2)= cache->sets[i].slots[j].access_ts; //least access ts is the lru
+//             }
+//         }
+//     }
+//     return lru;
+// }
 
-void evict(Cache *cache, unsigned int tag, unsigned int loop_counter) { //evict and replace
-    vector<int> lru = findLRU(cache, loop_counter);
+void evict(Cache *cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int * total_cycles, unsigned int loop_counter) { //evict and replace
+    //vector<int> lru = findLRU(cache, loop_counter);
 
     //following below pseudocode
     Slot *evict = NULL;
     int min = 2147483647;
-    // for (int i = 0; i< cache; i++){
-    //     //here
-    // }
+    for (int i = 0; i< cache->numslots; i++){
+        if (cache->sets[index].slots[i].access_ts < min) {
+            evict = &cache->sets[index].slots[i];
+            min = cache->sets[index].slots[i].access_ts;
+        }
+    }
+    evict->valid = true;
+    evict->tag = tag;
+    evict->access_ts = loop_counter;
+    
+    if (evict->dirty == true) {
+        *total_cycles = *total_cycles + (100 * slotSize / 4);
+    }
+
+    evict->dirty = false;
+
+    //evict->dirty = false;
+    
 
     // Slot * slot-to-evict = NULL;
-    // int min = max integer value
+    // int min = max integer values
     // loop through all slots at set[index]
     //    compare the access timestamp to min
     //    if smaller
@@ -259,10 +275,11 @@ void evict(Cache *cache, unsigned int tag, unsigned int loop_counter) { //evict 
     // then do slot-to-evict->tag = tag
     // slot-to-evict.valid = true, etc. (what you have below)
 
-    cache->sets[lru.at(0)].slots[lru.at(1)].valid = true;
-    cache->sets[lru.at(0)].slots[lru.at(1)].tag = tag;
-    cache->sets[lru.at(0)].slots[lru.at(1)].access_ts = loop_counter;
-    cache->sets[lru.at(0)].slots[lru.at(1)].dirty = true;
+
+    // cache->sets[lru.at(0)].slots[lru.at(1)].valid = true;
+    // cache->sets[lru.at(0)].slots[lru.at(1)].tag = tag;
+    // cache->sets[lru.at(0)].slots[lru.at(1)].access_ts = loop_counter;
+    // cache->sets[lru.at(0)].slots[lru.at(1)].dirty = true;
 }
 
 void set_counter(Cache* cache, unsigned int counter) {
