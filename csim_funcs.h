@@ -37,27 +37,27 @@ bool not_power_of_two(int num);
 /* Initialize the cache according to the configurations given by user */
 Cache init_cache(char **argv);
 
-bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index);
+bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned int slotSize, unsigned int loopCounter);
 
-bool storeHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block, const char* wHit, unsigned int loopCounter);
+void storeHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, const char* wHit, unsigned int loopCounter, unsigned int* store_hits);
 
-bool loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block);
+void loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, unsigned int* load_hits);
 
-void writeBack(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block);
+void writeBack(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block);
 
-bool storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block, const char *wMiss);
+void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, const char *wMiss, const char *wHit, unsigned int loopCounter, unsigned int* store_misses);
 
-bool loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, int* total_cycles, unsigned int bytes_in_block, const char* wMiss);
+void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, const char* wMiss, unsigned int loopCounter, unsigned int* load_misses);
 
 void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int loopCounter);
-
-void noWriteAllocate(int* totalCycles);
-
-void writeThrough(int* totalCycles);
 
 void evict(Cache *cache, unsigned int tag, unsigned int loopCounter);
 
 void set_counter(Cache* cache, unsigned int counter);
+
+// vector<int> findFIFO(Cache *cache, unsigned int loop_counter);
+
+// vector<int> findLRU(Cache *cache, unsigned int loop_counter);
 
 // void read_trace(unsigned int index, unsigned int tag);
 

@@ -54,30 +54,44 @@ int main(int argc, char **argv) {
         unsigned int address;
         char r_w;
         unsigned int extra;
-        iss >> l_or_s >> std::hex>>address>>extra;
+        iss >> l_or_s >> std::hex >> address >> extra;
 
 
         
 
-
-        unsigned int tag = (address >> indexSize) & maxTag;
-        unsigned int index = address & maxIndex;
+        //jank
+        // unsigned int tag = (address >> indexSize) & maxTag;
+        // unsigned int index = address & maxIndex;
         
 
+
+        //more jank
         // unsigned int offset = address & ((1 << bytes_in_block) - 1);
         // unsigned int index = (address >> bytes_in_block) & ((1 << indexSize) - 1);
         // unsigned int tag = address >> (bytes_in_block + indexSize);
 
         // cout<<tag<<" "<<index<<" "<<offset<<" "<<endl;
         
+        int bits_index = log2(sets);
+        int bits_offset = log2(blocks);
+        int bits_tag = 32 - bits_index - bits_offset;
+
+        unsigned int tag = address >> (bits_index +bits_offset);
+        unsigned int index = (address << bits_tag) >> (bits_offset + bits_tag); 
+        if (bits_offset + bits_tag == 32) {
+            index = 0;
+        }   
         
         
         
         
-        if (!(iss >> r_w >> std::hex >> address)) {
-            std::cerr << "Error parsing line: " << line << std::endl;
-            continue;
-        }
+        // if (!(iss >> r_w >> std::hex >> address)) {
+        //     cout<<iss.str()<<endl;
+        //     std::cerr << "Error parsing line: " << line << std::endl;
+        //     continue;
+        // }
+        
+        total_cycles++;
 
         if (l_or_s == "l"){ // loading
             total_loads++;
@@ -89,7 +103,6 @@ int main(int argc, char **argv) {
         } else if (l_or_s == "s"){ // storing
             total_stores++;
             if (trace_is_a_hit(&cache, tag, index, blocks, counter)) { // memory in cache
-                total_cycles++;
                 storeHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, allocation, counter, &store_hits);
             } else {
                 storeMiss(&cache, index, tag, blocks, &total_cycles, bytes_in_block, write_through, allocation, counter, &store_misses);

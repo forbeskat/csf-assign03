@@ -114,13 +114,14 @@ bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned
     // Check if the cache set at the specified index is empty
     //string here = cache->sets[index].slots[0].valid ? "true" : "false";
     //cout<<here<<endl;
-    if (cache->sets[index].slots.empty()) {
-        // Cache miss: The set is empty, so there can be no hits
-        return false;
-    }
+    // if (cache->sets[index].slots.empty()) {
+    //     // Cache miss: The set is empty, so there can be no hits
+    //     return false;
+    // }
 
     for (unsigned int i = 0; i < slotSize; i++) {
         if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
+            cache->sets[index].slots[i].access_ts = loopCounter; //UPDATE ACCESS TIMESTAMP;
             //cout<<cache->sets[index].slots[i].tag<<endl;
             return true;
         }
@@ -132,18 +133,18 @@ bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned
 
 // Store -> memory in cache (DONE)
 void storeHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, const char* wHit, unsigned int loopCounter, unsigned int* store_hits) {
-    *total_cycles = *total_cycles + 1;
+    // *total_cycles = *total_cycles + 1;
     *store_hits = *store_hits + 1;
-    for (unsigned int i = 0; i < slotSize; i++) {
-        if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
-            cache->sets[index].slots[i].access_ts = loopCounter; //UPDATE ACCESS TIMESTAMP;
-            // increase total cycles when eviction occurs to account for the write back to memory
-        }
-    }
+    // for (unsigned int i = 0; i < slotSize; i++) {
+    //     if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
+    //         cache->sets[index].slots[i].access_ts = loopCounter; //UPDATE ACCESS TIMESTAMP;
+    //         // increase total cycles when eviction occurs to account for the write back to memory
+    //     }
+    // }
 
     if (strcmp(wHit, "write-through") == 0) {
-        *total_cycles += (100 * bytes_in_block / 4);
-        return;
+        *total_cycles += 100; //(100 * bytes_in_block / 4);
+        // return;
     } else if (strcmp(wHit, "write-back") == 0) {
         writeBack(cache, index, tag, slotSize, total_cycles, bytes_in_block);
         return;
@@ -158,7 +159,7 @@ void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int 
         *total_cycles = *total_cycles + (100 * bytes_in_block / 4);
         // put into a new slot, write it into the cache
         checkForOpenSlot(cache, index, tag, slotSize, loopCounter);
-        *total_cycles = *total_cycles + 1;
+        // *total_cycles = *total_cycles + 1;
         if (strcmp(wHit, "write-through") == 0) {
             *total_cycles = *total_cycles + (100 * bytes_in_block / 4);
         } else if (strcmp(wHit, "write-back") == 0) {
@@ -185,14 +186,13 @@ void writeBack(Cache *cache, unsigned int index, unsigned int tag, unsigned int 
 // Load -> memory found in cache. We just need to update the time stamp.
 void loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, unsigned int* load_hits) {
     *load_hits = *load_hits + 1;
-    *total_cycles = *total_cycles + 1;
-    for (unsigned int i = 0; i < slotSize; i++) {
-        if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
-            cache->sets[index].slots[i].access_ts = cache->counter; //UPDATE ACCESS TIMESTAMP;
-            // increase total cycles when eviction occurs to account for the write back to memory
-            return;
-        }
-    }
+    // for (unsigned int i = 0; i < slotSize; i++) {
+    //     if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
+    //         cache->sets[index].slots[i].access_ts = cache->counter; //UPDATE ACCESS TIMESTAMP;
+    //         // increase total cycles when eviction occurs to account for the write back to memory
+    //         return;
+    //     }
+    // }
 }
 
 // Load -> memory not found in cache. This means that memory needs to be brought to the cache and then memory needs to be stored to the cache.
@@ -201,7 +201,7 @@ void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int s
     *load_misses = *load_misses + 1;
     // Create a new slot by replacing an invalid block in the cache
     checkForOpenSlot(cache, index, tag, slotSize, loopCounter);
-    *total_cycles = *total_cycles + 1;
+    // *total_cycles = *total_cycles + 1;
 }
 
 void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int loopCounter) {
@@ -240,6 +240,25 @@ vector<int> findLRU(Cache *cache, unsigned int loop_counter) {
 
 void evict(Cache *cache, unsigned int tag, unsigned int loop_counter) { //evict and replace
     vector<int> lru = findLRU(cache, loop_counter);
+
+    //following below pseudocode
+    Slot *evict = NULL;
+    int min = 2147483647;
+    // for (int i = 0; i< cache; i++){
+    //     //here
+    // }
+
+    // Slot * slot-to-evict = NULL;
+    // int min = max integer value
+    // loop through all slots at set[index]
+    //    compare the access timestamp to min
+    //    if smaller
+    //    then set *slot-to-evict = sets[index].slots[i]
+    //    and min = sets[index].slots[i].access_ts
+
+    // then do slot-to-evict->tag = tag
+    // slot-to-evict.valid = true, etc. (what you have below)
+
     cache->sets[lru.at(0)].slots[lru.at(1)].valid = true;
     cache->sets[lru.at(0)].slots[lru.at(1)].tag = tag;
     cache->sets[lru.at(0)].slots[lru.at(1)].access_ts = loop_counter;
