@@ -110,7 +110,7 @@ Cache init_cache(char **argv) {
 
 // Tag identifies the data block
 // Index determines the set to find the data in
-bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned int slotSize, unsigned int loopCounter) {
+bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned int slotSize, unsigned int loopCounter, const char* eviction) {
     // Check if the cache set at the specified index is empty
     //string here = cache->sets[index].slots[0].valid ? "true" : "false";
     //cout<<here<<endl;
@@ -121,7 +121,10 @@ bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned
 
     for (unsigned int i = 0; i < slotSize; i++) {
         if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
-            cache->sets[index].slots[i].access_ts = loopCounter; //UPDATE ACCESS TIMESTAMP;
+            if (strcmp(eviction, "lru") == 0) {
+                cache->sets[index].slots[i].access_ts = loopCounter; //UPDATE ACCESS TIMESTAMP;
+            }
+            
             //cout<<cache->sets[index].slots[i].tag<<endl;
             
             return true;
@@ -152,13 +155,13 @@ void storeHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int s
 }
 
 // Store -> memory not in cache (NOT DONE!!!!)
-void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, const char *wMiss, const char *wHit, unsigned int loopCounter, unsigned int* store_misses) {
+void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, const char *wMiss, const char *wHit, unsigned int loopCounter, unsigned int* store_misses, const char* eviction) {
     *store_misses = *store_misses + 1;
     if (strcmp(wMiss, "write-allocate") == 0) {
         // we bring the relevant memory block into the cache before the store proceeds, takes 100 processor cycles
         *total_cycles = *total_cycles + ((100 * bytes_in_block / 4) / 4);
         // put into a new slot, write it into the cache
-        checkForOpenSlot(cache, index, tag, slotSize, total_cycles, loopCounter);
+        checkForOpenSlot(cache, index, tag, slotSize, total_cycles, loopCounter, eviction);
         // *total_cycles = *total_cycles + 1;
         if (strcmp(wHit, "write-through") == 0) {
             *total_cycles = *total_cycles + ((100 * bytes_in_block / 4) / 4);
@@ -196,15 +199,15 @@ void loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int sl
 }
 
 // Load -> memory not found in cache. This means that memory needs to be brought to the cache and then memory needs to be stored to the cache.
-void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, const char* wMiss, unsigned int loopCounter, unsigned int* load_misses) {
+void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, const char* wMiss, unsigned int loopCounter, unsigned int* load_misses, const char* eviction) {
     *total_cycles = *total_cycles + (100 * bytes_in_block / 4);
     *load_misses = *load_misses + 1;
     // Create a new slot by replacing an invalid block in the cache
-    checkForOpenSlot(cache, index, tag, slotSize, total_cycles, loopCounter);
+    checkForOpenSlot(cache, index, tag, slotSize, total_cycles, loopCounter, eviction);
     // *total_cycles = *total_cycles + 1;
 }
 
-void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int * total_cycles, unsigned int loopCounter) {
+void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int * total_cycles, unsigned int loopCounter, const char* eviction) {
     // If slot is availble, add it to the cache
     for (unsigned int i = 0; i < slotSize; i++) {
         if (cache->sets[index].slots[i].valid == false) {
