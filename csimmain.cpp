@@ -21,13 +21,13 @@ int main(int argc, char **argv) {
 
     Cache cache = init_cache(argv);
 
-    int total_loads = 0;
-    int total_stores = 0;
-    int load_hits = 0;
-    int load_misses = 0;
-    int store_hits = 0;
-    int store_misses = 0;
-    int total_cycles = 0;
+    unsigned int total_loads = 0;
+    unsigned int total_stores = 0;
+    unsigned int load_hits = 0;
+    unsigned int load_misses = 0;
+    unsigned int store_hits = 0;
+    unsigned int store_misses = 0;
+    unsigned int total_cycles = 0;
 
     int sets = stoi(argv[1]);
     int blocks = stoi(argv[2]); // blocks = slotsSize
@@ -53,12 +53,27 @@ int main(int argc, char **argv) {
         string l_or_s;
         unsigned int address;
         char r_w;
-        // (l or s) (address) (some other stuff)
-        iss >> l_or_s >> address;
+        unsigned int extra;
+        iss >> l_or_s >> std::hex>>address>>extra;
+
+
+        
+
 
         unsigned int tag = (address >> indexSize) & maxTag;
         unsigned int index = address & maxIndex;
+        
 
+        // unsigned int offset = address & ((1 << bytes_in_block) - 1);
+        // unsigned int index = (address >> bytes_in_block) & ((1 << indexSize) - 1);
+        // unsigned int tag = address >> (bytes_in_block + indexSize);
+
+        // cout<<tag<<" "<<index<<" "<<offset<<" "<<endl;
+        
+        
+        
+        
+        
         if (!(iss >> r_w >> std::hex >> address)) {
             std::cerr << "Error parsing line: " << line << std::endl;
             continue;
@@ -66,17 +81,18 @@ int main(int argc, char **argv) {
 
         if (l_or_s == "l"){ // loading
             total_loads++;
-            if (trace_is_a_hit(&cache, tag, index)) { // memory in cache
-                loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block);
-                load_hits++; //
+            if (trace_is_a_hit(&cache, tag, index, blocks, counter)) { // memory in cache
+                loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, &load_hits);
+            } else {
+                loadMiss(&cache, index, tag, blocks, &total_cycles, bytes_in_block, allocation, counter, &load_misses);
             }
         } else if (l_or_s == "s"){ // storing
             total_stores++;
-            if (trace_is_a_hit(&cache, tag, index)) { // memory in cache
+            if (trace_is_a_hit(&cache, tag, index, blocks, counter)) { // memory in cache
                 total_cycles++;
-                storeHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, allocation, counter);
-            } else  {
-                storeMiss(&cache, index, tag, blocks, &total_cycles, bytes_in_block, write_through);
+                storeHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, allocation, counter, &store_hits);
+            } else {
+                storeMiss(&cache, index, tag, blocks, &total_cycles, bytes_in_block, write_through, allocation, counter, &store_misses);
             }
         } else {
             cout << "error: invalid input" << endl;
