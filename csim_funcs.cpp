@@ -144,36 +144,13 @@ void storeHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int s
     //         // increase total cycles when eviction occurs to account for the write back to memory
     //     }
     // }
-
-    if (strcmp(wHit, "write-through") == 0) {
-        *total_cycles += 100; //(100 * bytes_in_block / 4);
-        // return;
-    } else if (strcmp(wHit, "write-back") == 0) {
-        writeBack(cache, index, tag, slotSize, total_cycles, bytes_in_block);
-        return;
-    }
 }
 
 // Store -> memory not in cache (NOT DONE!!!!)
 void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, const char *wMiss, const char *wHit, unsigned int loopCounter, unsigned int* store_misses, const char* eviction) {
     *store_misses = *store_misses + 1;
-    if (strcmp(wMiss, "write-allocate") == 0) {
-        // we bring the relevant memory block into the cache before the store proceeds, takes 100 processor cycles
-        *total_cycles = *total_cycles + ((100 * bytes_in_block / 4) / 4);
-        // put into a new slot, write it into the cache
-        checkForOpenSlot(cache, index, tag, slotSize, total_cycles, loopCounter, eviction);
-        // *total_cycles = *total_cycles + 1;
-        if (strcmp(wHit, "write-through") == 0) {
-            *total_cycles = *total_cycles + ((100 * bytes_in_block / 4) / 4);
-        } else if (strcmp(wHit, "write-back") == 0) {
-            writeBack(cache, index, tag, slotSize, total_cycles, bytes_in_block);
-        }
-        
-    } else if (strcmp(wMiss, "no-write-allocate") == 0) {
-        // modify in memory
-        *total_cycles += (100 * bytes_in_block / 4);
-        return;
-    }
+    checkForOpenSlot(cache, index, tag, slotSize, total_cycles, loopCounter, eviction);
+
 }
 
 // a store writes to the cache only and marks the block dirty; if the block is evicted later, it has to be written back to memory before being replaced
@@ -187,7 +164,7 @@ void writeBack(Cache *cache, unsigned int index, unsigned int tag, unsigned int 
 }
 
 // Load -> memory found in cache. We just need to update the time stamp.
-void loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, unsigned int* load_hits) {
+void loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int bytes_in_block, unsigned int* load_hits, const char* wHit) {
     *load_hits = *load_hits + 1;
     // for (unsigned int i = 0; i < slotSize; i++) {
     //     if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
@@ -196,6 +173,14 @@ void loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int sl
     //         return;
     //     }
     // }
+
+    if (strcmp(wHit, "write-through") == 0) {
+        *total_cycles += 100; //(100 * bytes_in_block / 4);
+        // return;
+    } else if (strcmp(wHit, "write-back") == 0) {
+        writeBack(cache, index, tag, slotSize, total_cycles, bytes_in_block);
+        return;
+    }
 }
 
 // Load -> memory not found in cache. This means that memory needs to be brought to the cache and then memory needs to be stored to the cache.
@@ -203,8 +188,23 @@ void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int s
     *total_cycles = *total_cycles + (100 * bytes_in_block / 4);
     *load_misses = *load_misses + 1;
     // Create a new slot by replacing an invalid block in the cache
-    checkForOpenSlot(cache, index, tag, slotSize, total_cycles, loopCounter, eviction);
+
     // *total_cycles = *total_cycles + 1;
+
+    // Differencetiate no-write and write-allocate
+
+     if (strcmp(wMiss, "write-allocate") == 0) {
+        // we bring the relevant memory block into the cache before the store proceeds, takes 100 processor cycles
+        *total_cycles = *total_cycles + ((100 * bytes_in_block / 4) / 4);
+        // put into a new slot, write it into the cache
+        checkForOpenSlot(cache, index, tag, slotSize, total_cycles, loopCounter, eviction);
+        // *total_cycles = *total_cycles + 1;
+        
+    } else if (strcmp(wMiss, "no-write-allocate") == 0) {
+        // modify in memory
+        *total_cycles += (100 * bytes_in_block / 4);
+        return;
+    }
 }
 
 void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int * total_cycles, unsigned int loopCounter, const char* eviction) {
@@ -288,3 +288,7 @@ void evict(Cache *cache, unsigned int index, unsigned int tag, unsigned int slot
 void set_counter(Cache* cache, unsigned int counter) {
     cache->counter = counter;
 }
+
+
+// LoadHit -> write-back and write-allocate
+// 

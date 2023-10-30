@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
         int bits_index = log2(sets);
         int bits_offset = log2(blocks);
         int bits_tag = 32 - bits_index - bits_offset;
-        unsigned int tag = address >> (bits_index +bits_offset);
+        unsigned int tag = address >> (bits_index + bits_offset);
         unsigned int index = (address << bits_tag) >> (bits_offset + bits_tag); 
         
         if (bits_offset + bits_tag == 32) {
@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
         if (l_or_s == "l"){ // loading
             total_loads++;
             if (trace_is_a_hit(&cache, tag, index, blocks, counter, eviction)) { // memory in cache
-                loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, &load_hits);
+                loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, &load_hits, write_through);
             } else {
                 loadMiss(&cache, index, tag, blocks, &total_cycles, bytes_in_block, allocation, counter, &load_misses, eviction);
             }
