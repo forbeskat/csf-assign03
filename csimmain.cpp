@@ -97,13 +97,15 @@ int main(int argc, char **argv) {
         if (l_or_s == "l"){ // loading
             total_loads++;
             if (trace_is_a_hit(&cache, tag, index, blocks, counter, eviction)) { // memory in cache
-                loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, &load_hits, write_through);
+                //loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, &load_hits, write_through);
+                load_hits++;
+                //access alr updated
             } else {
                 loadMiss(&cache, index, tag, blocks, &total_cycles, bytes_in_block, allocation, counter, &load_misses, eviction);
             }
         } else if (l_or_s == "s"){ // storing
             total_stores++;
-            if (trace_is_a_hit(&cache, tag, index, blocks, counter, eviction)) { // memory in cache
+            if (trace_is_a_hit_s(&cache, tag, index, blocks, counter, eviction)) { // memory in cache
                 storeHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, allocation, counter, &store_hits);
             } else {
                 storeMiss(&cache, index, tag, blocks, &total_cycles, bytes_in_block, write_through, allocation, counter, &store_misses, eviction);

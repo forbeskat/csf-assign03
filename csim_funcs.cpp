@@ -114,10 +114,10 @@ bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned
     // Check if the cache set at the specified index is empty
     //string here = cache->sets[index].slots[0].valid ? "true" : "false";
     //cout<<here<<endl;
-    // if (cache->sets[index].slots.empty()) {
-    //     // Cache miss: The set is empty, so there can be no hits
-    //     return false;
-    // }
+    if (cache->sets[index].slots.empty()) {
+        // Cache miss: The set is empty, so there can be no hits
+        return false;
+    }
 
     for (unsigned int i = 0; i < slotSize; i++) {
         if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
@@ -134,6 +134,17 @@ bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned
         }
     }
     // Cache miss: The data with the specified tag is not found in the cache set
+    return false;
+}
+
+
+//literally the same thing but no update access ts
+bool trace_is_a_hit_s(Cache* cache, unsigned int tag, unsigned int index, unsigned int slotSize, unsigned int loopCounter, const char* eviction) {
+    for (unsigned int i = 0; i < slotSize; i++) {
+        if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
+            return true;
+        }
+    }
     return false;
 }
 
