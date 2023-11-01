@@ -91,8 +91,8 @@ int main(int argc, char **argv) {
         // }
         
         total_cycles++;
-        // counter++;
-        // set_counter(&cache, counter);
+        counter++;
+        set_counter(&cache, counter);
 
         if (l_or_s == "l"){ // loading
             total_loads++;
@@ -100,6 +100,7 @@ int main(int argc, char **argv) {
                 //loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, &load_hits, write_through);
                 load_hits++;
                 //access alr updated
+                //fifo todo: update load_ts
             } else {
                 loadMiss(&cache, index, tag, blocks, &total_cycles, bytes_in_block, allocation, counter, &load_misses, eviction);
             }
@@ -114,8 +115,8 @@ int main(int argc, char **argv) {
             cout << "error: invalid input" << endl;
         }
 
-        counter++;
-        set_counter(&cache, counter);
+        // counter++;
+        // set_counter(&cache, counter);
     }
 
     cout << "Total loads: " << total_loads << endl;
