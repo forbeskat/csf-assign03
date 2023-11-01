@@ -111,10 +111,22 @@ bool trace_is_a_hit_s(Cache* cache, unsigned int tag, unsigned int index, unsign
     for (unsigned int i = 0; i < slotSize; i++) {
         if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
             // cache->sets[index].slots[i].dirty=true;
-            return true;
+            return i;
+            //return true;
         }
     }
     return false;
+}
+
+int val_trace_is_a_hit_s(Cache* cache, unsigned int tag, unsigned int index, unsigned int slotSize, unsigned int loopCounter, const char* eviction, int idk) {
+    for (unsigned int i = 0; i < slotSize; i++) {
+        if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
+            // cache->sets[index].slots[i].dirty=true;
+            return i;
+            //return true;
+        }
+    }
+    return -1;
 }
 
 // Store -> memory in cache (DONE)
@@ -189,7 +201,7 @@ void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsign
             cache->sets[index].slots[i].valid = true;
             cache->sets[index].slots[i].tag = tag;
             cache->sets[index].slots[i].access_ts = loopCounter;
-            cache->sets[index].slots[i].dirty = false;
+            //cache->sets[index].slots[i].dirty = false;
             return;
         }
     }
@@ -212,7 +224,7 @@ void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsign
     if (evict->dirty == true) { //slot is dirty so write to memory
         *total_cycles = *total_cycles + (100 * slotSize / 4);
     }
-    evict->dirty = false; //should match memory now
+    //evict->dirty = false; //should match memory now
 
     
 }
@@ -231,6 +243,9 @@ void checkForOpenSlot_wb(Cache* cache, unsigned int index, unsigned int tag, uns
             return;
         }
     }
+}
+
+void evict(Cache *cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int * total_cycles, unsigned int loopCounter) {
     
     // If there is no slot available, we need to evict one and replace it
     Slot *evict = NULL;
