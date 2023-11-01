@@ -51,6 +51,8 @@ void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int s
 
 void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int* total_cycles, unsigned int loopCounter, const char* eviction);
 
+void checkForOpenSlot_wb(Cache* cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int * total_cycles, unsigned int loopCounter, const char* eviction);
+
 void evict(Cache *cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int * total_cycles, unsigned int loopCounter);
 
 void set_counter(Cache* cache, unsigned int counter);
