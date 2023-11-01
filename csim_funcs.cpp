@@ -121,6 +121,7 @@ bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned
 
     for (unsigned int i = 0; i < slotSize; i++) {
         if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
+        //if (cache->sets[index].slots[i].tag == tag) {
             if (strcmp(eviction, "lru") == 0) {
                 cache->sets[index].slots[i].access_ts = loopCounter; //UPDATE ACCESS TIMESTAMP;
             }
@@ -144,6 +145,10 @@ void storeHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int s
     //         // increase total cycles when eviction occurs to account for the write back to memory
     //     }
     // }
+    if (strcmp(wHit, "write-back")){
+        *total_cycles += 100;//(100 * bytes_in_block / 4);
+        writeBack(cache, index, tag, slotSize, total_cycles, bytes_in_block);
+    }
 }
 
 // Store -> memory not in cache (NOT DONE!!!!)
@@ -175,7 +180,7 @@ void loadHit(Cache* cache, unsigned int index, unsigned int tag, unsigned int sl
     // }
 
     if (strcmp(wHit, "write-through") == 0) {
-        *total_cycles += 100; //(100 * bytes_in_block / 4);
+        *total_cycles += 100;//(100 * bytes_in_block / 4);
         // return;
     } else if (strcmp(wHit, "write-back") == 0) {
         writeBack(cache, index, tag, slotSize, total_cycles, bytes_in_block);
@@ -218,9 +223,29 @@ void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsign
             return;
         }
     }
+    
 
     // If there is no slot available, we need to evict one and replace it
-    evict(cache, index, tag, slotSize, total_cycles, loopCounter);
+    //evict(cache, index, tag, slotSize, total_cycles, loopCounter);
+    Slot *evict = NULL;
+    int min = 2147483647;
+    for (int i = 0; i< cache->numslots; i++){
+        if (cache->sets[index].slots[i].access_ts < min) {
+            evict = &cache->sets[index].slots[i];
+            min = cache->sets[index].slots[i].access_ts;
+        }
+    }
+    evict->valid = true;
+    evict->tag = tag;
+    evict->access_ts = loopCounter;
+    
+    if (evict->dirty == true) {
+        *total_cycles = *total_cycles + (100 * slotSize / 4);
+    }
+
+    evict->dirty = false;
+
+    
 }
 
 // vector<int> findFIFO(Cache *cache, unsigned int loop_counter) {
@@ -242,48 +267,48 @@ void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsign
 //     return lru;
 // }
 
-void evict(Cache *cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int * total_cycles, unsigned int loop_counter) { //evict and replace
-    //vector<int> lru = findLRU(cache, loop_counter);
+// void evict(Cache *cache, unsigned int index, unsigned int tag, unsigned int slotSize, unsigned int * total_cycles, unsigned int loop_counter) { //evict and replace
+//     //vector<int> lru = findLRU(cache, loop_counter);
 
-    //following below pseudocode
-    Slot *evict = NULL;
-    int min = 2147483647;
-    for (int i = 0; i< cache->numslots; i++){
-        if (cache->sets[index].slots[i].access_ts < min) {
-            evict = &cache->sets[index].slots[i];
-            min = cache->sets[index].slots[i].access_ts;
-        }
-    }
-    evict->valid = true;
-    evict->tag = tag;
-    evict->access_ts = loop_counter;
+//     //following below pseudocode
+//     Slot *evict = NULL;
+//     int min = 2147483647;
+//     for (int i = 0; i< cache->numslots; i++){
+//         if (cache->sets[index].slots[i].access_ts < min) {
+//             evict = &cache->sets[index].slots[i];
+//             min = cache->sets[index].slots[i].access_ts;
+//         }
+//     }
+//     evict->valid = true;
+//     evict->tag = tag;
+//     evict->access_ts = loop_counter;
     
-    if (evict->dirty == true) {
-        *total_cycles = *total_cycles + (100 * slotSize / 4);
-    }
+//     if (evict->dirty == true) {
+//         *total_cycles = *total_cycles + (100 * slotSize / 4);
+//     }
 
-    evict->dirty = false;
+//     evict->dirty = false;
 
-    //evict->dirty = false;
+//     //evict->dirty = false;
     
 
-    // Slot * slot-to-evict = NULL;
-    // int min = max integer values
-    // loop through all slots at set[index]
-    //    compare the access timestamp to min
-    //    if smaller
-    //    then set *slot-to-evict = sets[index].slots[i]
-    //    and min = sets[index].slots[i].access_ts
+//     // Slot * slot-to-evict = NULL;
+//     // int min = max integer values
+//     // loop through all slots at set[index]
+//     //    compare the access timestamp to min
+//     //    if smaller
+//     //    then set *slot-to-evict = sets[index].slots[i]
+//     //    and min = sets[index].slots[i].access_ts
 
-    // then do slot-to-evict->tag = tag
-    // slot-to-evict.valid = true, etc. (what you have below)
+//     // then do slot-to-evict->tag = tag
+//     // slot-to-evict.valid = true, etc. (what you have below)
 
 
-    // cache->sets[lru.at(0)].slots[lru.at(1)].valid = true;
-    // cache->sets[lru.at(0)].slots[lru.at(1)].tag = tag;
-    // cache->sets[lru.at(0)].slots[lru.at(1)].access_ts = loop_counter;
-    // cache->sets[lru.at(0)].slots[lru.at(1)].dirty = true;
-}
+//     // cache->sets[lru.at(0)].slots[lru.at(1)].valid = true;
+//     // cache->sets[lru.at(0)].slots[lru.at(1)].tag = tag;
+//     // cache->sets[lru.at(0)].slots[lru.at(1)].access_ts = loop_counter;
+//     // cache->sets[lru.at(0)].slots[lru.at(1)].dirty = true;
+// }
 
 void set_counter(Cache* cache, unsigned int counter) {
     cache->counter = counter;

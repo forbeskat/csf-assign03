@@ -91,6 +91,8 @@ int main(int argc, char **argv) {
         // }
         
         total_cycles++;
+        // counter++;
+        // set_counter(&cache, counter);
 
         if (l_or_s == "l"){ // loading
             total_loads++;
