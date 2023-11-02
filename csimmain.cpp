@@ -32,45 +32,26 @@ int main(int argc, char **argv) {
     int sets = stoi(argv[1]);
     int blocks = stoi(argv[2]); // blocks = slotsSize
     int bytes_in_block = stoi(argv[3]); // blockSize
-    const char* allocation = argv[4];
-    const char* write_through = argv[5];
-    const char* eviction = argv[6];
-    int indexSize = log2(sets);
-    int offsetSize = log2(blocks);
-    unsigned int tagSize = 32 - indexSize - offsetSize;
-    unsigned int maxTag = (1 << tagSize) - 1;
-    unsigned int maxIndex = (1 << indexSize) - 1;
+    string allocation = argv[4];
+    string write_through = argv[5];
+    string eviction = argv[6];
+    //int indexSize = log2(sets);
+    //int offsetSize = log2(blocks);
+    //unsigned int tagSize = 32 - indexSize - offsetSize;
+    // unsigned int maxTag = (1 << tagSize) - 1;
+    // unsigned int maxIndex = (1 << indexSize) - 1;
 
     string line;
-
-    // dirty for write through or evict
-    // increment total cycles
 
     int counter = 0;
     while(getline(cin, line)) {
         istringstream iss(line);
         string l_or_s;
         unsigned int address;
-        char r_w;
+        // char r_w;
         unsigned int extra;
         iss >> l_or_s >> std::hex >> address >> extra;
 
-
-        
-
-        //jank
-        // unsigned int tag = (address >> indexSize) & maxTag;
-        // unsigned int index = address & maxIndex;
-        
-
-
-        //more jank
-        // unsigned int offset = address & ((1 << bytes_in_block) - 1);
-        // unsigned int index = (address >> bytes_in_block) & ((1 << indexSize) - 1);
-        // unsigned int tag = address >> (bytes_in_block + indexSize);
-
-        // cout<<tag<<" "<<index<<" "<<offset<<" "<<endl;
-        
         int bits_index = log2(sets);
         int bits_offset = log2(blocks);
         int bits_tag = 32 - bits_index - bits_offset;
@@ -81,43 +62,28 @@ int main(int argc, char **argv) {
             index = 0;
         }   
         
-        
-        
-        
-        // if (!(iss >> r_w >> std::hex >> address)) {
-        //     cout<<iss.str()<<endl;
-        //     std::cerr << "Error parsing line: " << line << std::endl;
-        //     continue;
-        // }
-        
         total_cycles++;
         counter++;
         set_counter(&cache, counter);
 
+        Slot* slot = val_trace_is_a_hit(&cache, tag, index, blocks, counter, eviction);
         if (l_or_s == "l"){ // loading
             total_loads++;
-            if (val_trace_is_a_hit(&cache, tag, index, blocks, counter, eviction, 0)!=-1) { // memory in cache
-                loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, &load_hits, write_through, counter, eviction);
-                //load_hits++;
-                //access alr updated
-                //fifo todo: update load_ts
-                
-            } else {
-                loadMiss(&cache, index, tag, blocks, &total_cycles, bytes_in_block, allocation, counter, &load_misses, eviction);
+            if (slot != NULL) { // memory in cache
+                loadHit(&cache, slot, &total_cycles, &load_hits);
+            } else { //memory not in cache
+                loadMiss(&cache, index, tag, &total_cycles, counter, &load_misses, write_through);
             }
         } else if (l_or_s == "s"){ // storing
             total_stores++;
-            if (trace_is_a_hit_s(&cache, tag, index, blocks, counter, eviction)) { // memory in cache
-                storeHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, allocation, counter, &store_hits, eviction);
-            } else {
-                storeMiss(&cache, index, tag, blocks, &total_cycles, bytes_in_block, write_through, allocation, counter, &store_misses, eviction);
+            if (slot != NULL) { // memory in cache
+                storeHit(&cache, slot, index, tag, &total_cycles, counter, &store_hits);
+            } else { //memory not in cache
+                storeMiss(&cache, index, tag, &total_cycles, counter, &store_misses);
             }
         } else {
             cout << "error: invalid input" << endl;
         }
-
-        // counter++;
-        // set_counter(&cache, counter);
     }
 
     cout << "Total loads: " << total_loads << endl;
@@ -127,6 +93,5 @@ int main(int argc, char **argv) {
     cout << "Store hits: " << store_hits << endl;
     cout << "Store misses: " << store_misses << endl;
     cout << "Total cycles: " << total_cycles << endl;
-
     return 0;
 }
