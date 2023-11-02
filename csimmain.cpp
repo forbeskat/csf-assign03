@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 
         if (l_or_s == "l"){ // loading
             total_loads++;
-            if (trace_is_a_hit(&cache, tag, index, blocks, counter, eviction)) { // memory in cache
+            if (val_trace_is_a_hit(&cache, tag, index, blocks, counter, eviction, 0)!=-1) { // memory in cache
                 loadHit(&cache, index, tag, blocks, &total_cycles, bytes_in_block, &load_hits, write_through, counter, eviction);
                 //load_hits++;
                 //access alr updated

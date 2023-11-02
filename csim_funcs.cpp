@@ -8,9 +8,6 @@
 
 using namespace std;
 
-// write-allocate = store miss
-// get address from memory and then store, 
-
 bool has_invalid_param(int argc, char **argv) {
 
     int sets = stoi(argv[1]);
@@ -86,13 +83,13 @@ Cache init_cache(char **argv) {
 // Index determines the set to find the data in
 bool trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned int blockSize, unsigned int loopCounter, const char* eviction) {
     if (cache->sets[index].slots.empty()) {
-        // Cache miss: The set is empty, so there can be no hits
+        // Cache miss: The set is empty, so there can be no hits but it should never be empty>
         return false;
     }
 
     for (unsigned int i = 0; i < blockSize; i++) {
-        //if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
-        if (cache->sets[index].slots[i].tag == tag) {
+        if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
+        //if (cache->sets[index].slots[i].tag == tag) {
             if (strcmp(eviction, "lru") == 0) {
                 cache->sets[index].slots[i].access_ts = loopCounter; //UPDATE ACCESS TIMESTAMP;
             }
@@ -158,17 +155,16 @@ void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int 
     //update write to memory
     
     if (strcmp(allocate,"write-allocate")!=0){ //no allocate => write through
-        (*total_cycles) += (100-1);
+        (*total_cycles) += (100 - 1);
+        // update the cache with new tag, same as LoadMiss
+        // write to cache
         return;
-    } else{
+    } else {
         // (*total_cycles) += (100 * bytes_in_block / 4);
         (*total_cycles)+=1;
         if(strcmp(through_back,"write-through")==0){ //write allocate + write through
-            (*total_cycles)+=100;
-            checkForOpenSlot(cache, index, tag, blockSize, total_cycles, loopCounter, eviction);
-        } else{ //write allocate + write back
-            checkForOpenSlot_wb(cache, index, tag, blockSize, total_cycles, loopCounter, eviction);
-        }
+            (*total_cycles) += 100;
+        } 
     }
 
     //checkForOpenSlot(cache, index, tag, blockSize, total_cycles, loopCounter, eviction);
@@ -213,8 +209,8 @@ void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsign
     //         return;
     //     }
     // }
-
-    int replace = val_trace_is_a_hit(cache,  tag, index, blockSize, loopCounter, eviction, 0);
+     
+    int replace = val_trace_is_a_hit(cache,  tag, index, blockSize, loopCounter, eviction, 0); //is this alwasys -1
     if (replace != -1) {
         cache->sets[index].slots[replace].valid = true;
         cache->sets[index].slots[replace].tag = tag;
@@ -245,6 +241,7 @@ void checkForOpenSlot(Cache* cache, unsigned int index, unsigned int tag, unsign
     
 }
 
+//get slot index of block to evict
 int evict(Cache *cache, unsigned int index, unsigned int tag, unsigned int blockSize, unsigned int * total_cycles, unsigned int loopCounter) {
     
     // If there is no slot available, we need to evict one and replace it
@@ -268,8 +265,6 @@ int evict(Cache *cache, unsigned int index, unsigned int tag, unsigned int block
 }
 
 void checkForOpenSlot_wb(Cache* cache, unsigned int index, unsigned int tag, unsigned int blockSize, unsigned int * total_cycles, unsigned int loopCounter, const char* eviction) {
-    //literally the same thing but with dirty = true
-
     // If slot is availble, add it to the cache
     for (unsigned int i = 0; i < blockSize; i++) {
         if (cache->sets[index].slots[i].valid == false) {
@@ -283,7 +278,6 @@ void checkForOpenSlot_wb(Cache* cache, unsigned int index, unsigned int tag, uns
     }
 
     // If there is no slot available, we need to evict one and replace it
-    
     cache->sets[index].slots[evict(cache, index, tag, blockSize, total_cycles, loopCounter)].dirty = true;
     //cout<<cache->sets[index].slots[evict(cache, index, tag, blockSize, total_cycles, loopCounter)].dirty<<endl;
 }
