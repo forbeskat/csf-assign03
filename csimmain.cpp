@@ -27,6 +27,7 @@ int main(int argc, char **argv) {
 
     int sets = stoi(argv[1]);
     int blocks = stoi(argv[2]); // blocks = slotsSize
+    int bytes_in_block = stoi(argv[3]); // blockSize
     string allocation = argv[4];
     string write_through = argv[5];
     string eviction = argv[6];
@@ -42,7 +43,7 @@ int main(int argc, char **argv) {
         iss >> l_or_s >> std::hex >> address >> extra;
 
         int bits_index = log2(sets);
-        int bits_offset = log2(blocks);
+        int bits_offset = log2(bytes_in_block);
         int bits_tag = 32 - bits_index - bits_offset;
         unsigned int tag = address >> (bits_index + bits_offset);
         unsigned int index = (address << bits_tag) >> (bits_offset + bits_tag); 

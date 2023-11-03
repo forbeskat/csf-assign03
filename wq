@@ -1,0 +1,28 @@
+[1mdiff --git a/csim b/csim[m
+[1mindex fc86065..70d4c1b 100755[m
+Binary files a/csim and b/csim differ
+[1mdiff --git a/csim_funcs.o b/csim_funcs.o[m
+[1mindex 928fdbe..1dd30c9 100644[m
+Binary files a/csim_funcs.o and b/csim_funcs.o differ
+[1mdiff --git a/csimmain.cpp b/csimmain.cpp[m
+[1mindex 8633830..816382c 100644[m
+[1m--- a/csimmain.cpp[m
+[1m+++ b/csimmain.cpp[m
+[36m@@ -82,14 +82,6 @@[m [mint main(int argc, char **argv) {[m
+         }   [m
+         [m
+         [m
+[31m-        [m
+[31m-        [m
+[31m-        // if (!(iss >> r_w >> std::hex >> address)) {[m
+[31m-        //     cout<<iss.str()<<endl;[m
+[31m-        //     std::cerr << "Error parsing line: " << line << std::endl;[m
+[31m-        //     continue;[m
+[31m-        // }[m
+[31m-        [m
+         total_cycles++;[m
+         counter++;[m
+         set_counter(&cache, counter);[m
+[1mdiff --git a/csimmain.o b/csimmain.o[m
+[1mindex cbc3fbb..3f2da17 100644[m
+Binary files a/csimmain.o and b/csimmain.o differ

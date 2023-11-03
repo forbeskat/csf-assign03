@@ -24,6 +24,7 @@ struct Cache {
     vector<Set> sets;
     unsigned int numslots;
     unsigned int numsets;
+    unsigned int numbytes;
     int counter = 0;
     string replacement;
     bool is_write_back = false;

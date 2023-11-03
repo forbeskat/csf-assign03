@@ -10,7 +10,7 @@ using namespace std;
 
 bool has_invalid_param(char **argv) {
     int sets = stoi(argv[1]);
-    //int blocks = stoi(argv[2]);
+    int blocks = stoi(argv[2]);
     int bytes_in_block = stoi(argv[3]);
     std::string allocation = argv[4];
     std::string write_through = argv[5];
@@ -56,7 +56,7 @@ bool not_power_of_two(int num) {
 Cache init_cache(char **argv) {
     unsigned int sets = stoi(argv[1]);
     unsigned int blocks = stoi(argv[2]); // blocks = slotsSize
-    //int bytes_in_block = stoi(argv[3]); // blockSize
+    // int bytes_in_block = stoi(argv[3]); // blockSize
     std::string write_allocate = argv[4];
     std::string through_or_back = argv[5];
     std::string eviction = argv[6];
@@ -64,8 +64,10 @@ Cache init_cache(char **argv) {
     //int offsetSize = log2(blocks);
     //unsigned int tagSize = 32 - indexSize - offsetSize;
     Cache cache;
+    cache.numsets = stoi(argv[1]); 
     cache.numslots = stoi(argv[2]);
-    cache.numsets = stoi(argv[1]); // changed from 3 to 1
+    cache.numbytes = stoi(argv[3]);
+    
     cache.replacement = argv[6];
     cache.sets.resize(sets);
 
@@ -129,12 +131,12 @@ void loadHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int*
 
 // Load -> memory not found in cache. This means that memory needs to be brought to the cache and then memory needs to be stored to the cache.
 void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* load_misses) {
-    *total_cycles = *total_cycles + (100 * cache->numslots / 4);
+    *total_cycles = *total_cycles + (100 * cache->numbytes / 4);
     *load_misses = *load_misses + 1;
     Slot* victim = find_open_slot(cache, index, cache->replacement);
 
     if (victim->valid && cache->is_write_back && victim->dirty) {
-        *total_cycles = *total_cycles + (100 * cache->numslots / 4);
+        *total_cycles = *total_cycles + (100 * cache->numbytes / 4);
     }
     
     reassign(cache, victim, tag);
@@ -168,33 +170,36 @@ void storeHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int
 // Store -> memory not found in cache. This means that we have to do some other stuff
 void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* store_misses) {
     *store_misses = *store_misses + 1;
-
-    Slot *slot = find_open_slot(cache, index, cache->replacement);
+    
     if (!cache->is_write_allocate && !cache->is_write_back) { // No-write-allocate + write-through
         *total_cycles = *total_cycles + 100;
         return; // Do nothing
-    } else if (cache->is_write_allocate && !cache->is_write_back) { // Write-allocate + write-through
-        slot->access_ts = cache->counter;
-        // slot->dirty = true;
-        slot->valid = true;
+    }
+    
+    Slot *slot = find_open_slot(cache, index, cache->replacement);
+    *total_cycles = *total_cycles + (100 * cache->numbytes / 4);// cost of loading block
+    if (slot->valid && cache->is_write_back && slot->dirty) {
+        *total_cycles = *total_cycles + (100 * cache->numbytes / 4); // cost of writing back dirty block
+    }
+
+    if (cache->is_write_allocate && !cache->is_write_back) { // Write-allocate + write-through
+        reassign(cache, slot, tag);
         *total_cycles = *total_cycles + 100;
     } else { // Write-allocate + write-back
-        slot->access_ts = cache->counter;
-        // slot->load_ts = cache->counter;
+        reassign(cache, slot, tag);
         slot->dirty = true;
-        slot->valid = true;
         *total_cycles = *total_cycles + 1;
     }
 
-    if (!cache->is_write_allocate && !cache->is_write_back) { // No-write-allocate + write-through
-        return; // Do nothing
-    } else if (cache->is_write_allocate && !cache->is_write_back) { // Write-allocate + write-through
-        Slot *victim = find_open_slot(cache, index, cache->replacement);
-        reassign(cache, victim, tag);
-    } else { // Write-allocate + write-back
-        Slot *victim = find_open_slot(cache, index, cache->replacement);
-        reassign(cache, victim, tag);
-    }
+    // if (!cache->is_write_allocate && !cache->is_write_back) { // No-write-allocate + write-through
+    //     return; // Do nothing
+    // } else if (cache->is_write_allocate && !cache->is_write_back) { // Write-allocate + write-through
+    //     Slot *victim = find_open_slot(cache, index, cache->replacement);
+    //     reassign(cache, victim, tag);
+    // } else { // Write-allocate + write-back
+    //     Slot *victim = find_open_slot(cache, index, cache->replacement);
+    //     reassign(cache, victim, tag);
+    // }
 
     ///////////////////
 
