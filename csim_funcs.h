@@ -47,7 +47,7 @@ Slot* val_trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, uns
 Slot* find_open_slot(Cache *cache, unsigned int index, string replacement);
 
 //handle load when there is a hit
-void loadHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int* load_hits);
+void loadHit(unsigned int* total_cycles, unsigned int* load_hits);
 
 //handle load when there is a miss
 void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int* load_misses);
@@ -60,8 +60,5 @@ void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int*
 
 //update a victim slot
 void reassign(Cache* cache, Slot *victim, unsigned int tag);
-
-//update counter
-void set_counter(Cache* cache, unsigned int counter);
 
 #endif

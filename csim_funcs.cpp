@@ -10,15 +10,13 @@ using namespace std;
 
 //check for any possible errors in the command line arguments
 bool has_invalid_param(char **argv) {
-    int sets = stoi(argv[1]);
-    int bytes_in_block = stoi(argv[3]);
     std::string allocation = argv[4];
     std::string write_through = argv[5];
     std::string eviction = argv[6];
-    if (not_power_of_two(sets) || not_power_of_two(bytes_in_block)) {
+    if (not_power_of_two(stoi(argv[1])) || not_power_of_two(stoi(argv[3]))) {
         cerr << "Number of sets and block size must be a power of 2." << endl;
         return true;
-    } else if (bytes_in_block < 4) {
+    } else if (stoi(argv[3]) < 4) {
         cerr << "Number of bytes in block must be at least 4." << endl;
         return true;
     } else if (allocation == "no-write-allocate" && write_through == "write-back") {
@@ -56,7 +54,7 @@ Cache init_cache(char **argv) {
     return cache;
 }
 
-// return the value of the slot that is a hit if there is a hit and updates the access ts
+// if there is a hit, return the slot that is a hit and update its time stamp
 Slot* val_trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned int blockSize) {
     for (unsigned int i = 0; i < blockSize; i++) {
         if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
@@ -95,7 +93,7 @@ Slot* find_open_slot(Cache *cache, unsigned int index, string replacement) {
 }
 
 // Load -> memory found in cache. We just need to uupdate load hits and total cycles.
-void loadHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int* load_hits) {
+void loadHit( unsigned int* total_cycles, unsigned int* load_hits) {
     *load_hits = *load_hits + 1;
     *total_cycles = *total_cycles + 1;
 }
@@ -110,13 +108,11 @@ void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* 
         *total_cycles = *total_cycles + (100 * cache->numbytes / 4);
     }
     reassign(cache, victim, tag);
-    victim->dirty = false;
 }
 
 // Store -> memory found in cache. update store hits and handle dirty/total cycles based on provided parameters.
 void storeHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int* store_hits) {
     *store_hits = *store_hits + 1;
-
     if (!cache->is_write_allocate && !cache->is_write_back) {
         *total_cycles = *total_cycles + 100;
     } else if (cache->is_write_allocate && !cache->is_write_back) {
@@ -142,7 +138,6 @@ void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int*
     if (slot->valid && cache->is_write_back && slot->dirty) {
         *total_cycles = *total_cycles + (100 * cache->numbytes / 4); // cost of writing back dirty block
     }
-
     if (cache->is_write_allocate && !cache->is_write_back) { // Write-allocate + write-through
         reassign(cache, slot, tag);
         *total_cycles = *total_cycles + 100;
@@ -159,8 +154,4 @@ void reassign(Cache* cache, Slot *victim, unsigned int tag) {
     victim->tag = tag;
     victim->valid = true;
     victim->dirty = false;
-}
-
-void set_counter(Cache* cache, unsigned int counter) {
-    cache->counter = counter;
 }

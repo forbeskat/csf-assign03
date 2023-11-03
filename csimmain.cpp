@@ -44,13 +44,13 @@ int main(int argc, char **argv) {
         }   
         
         counter++;
-        set_counter(&cache, counter);
+        cache.counter = counter;
 
         Slot* slot = val_trace_is_a_hit(&cache, tag, index, cache.numslots);
         if (l_or_s == "l"){ // loading
             total_loads++;
             if (slot != NULL) { // memory in cache
-                loadHit(&cache, slot, &total_cycles, &load_hits);
+                loadHit(&total_cycles, &load_hits);
             } else { //memory not in cache
                 loadMiss(&cache, index, tag, &total_cycles, &load_misses);
             }
