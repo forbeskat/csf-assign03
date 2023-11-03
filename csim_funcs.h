@@ -50,19 +50,18 @@ Slot* find_open_slot(Cache *cache, unsigned int index, string replacement);
 void loadHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int* load_hits);
 
 //handle load when there is a miss
-void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* load_misses);
+void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int* load_misses);
 
 //handle store when there is a hit
 void storeHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int* store_hits);
 
 //handle store when there is a miss
-void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* store_misses);
+void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int* store_misses);
 
-//reassign a victim slot for new tag
+//update a victim slot
 void reassign(Cache* cache, Slot *victim, unsigned int tag);
 
 //update counter
 void set_counter(Cache* cache, unsigned int counter);
-
 
 #endif
