@@ -5,7 +5,6 @@
 #include <iostream>
 #include <map>
 #include <vector>
-//#include "sets_and_slots.h"
 
 using namespace std;
 
@@ -40,19 +39,28 @@ bool not_power_of_two(int num);
 /* Initialize the cache according to the configurations given by user */
 Cache init_cache(char **argv);
 
+//return the value of the slot that is a hit if there is a hit
 Slot* val_trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned int blockSize);
 
+//find the next available slot in the set or evict to create an open slot if necessary
 Slot* find_open_slot(Cache *cache, unsigned int index, string replacement);
 
+//handle load when there is a hit
 void loadHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int* load_hits);
 
-// 7 params
+//handle load when there is a miss
 void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* load_misses);
 
-void storeHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* store_hits);
+//handle store when there is a hit
+void storeHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int* store_hits);
 
+//handle store when there is a miss
 void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* store_misses);
 
+//reassign a victim slot for new tag
+void reassign(Cache* cache, Slot *victim, unsigned int tag);
+
+//update counter
 void set_counter(Cache* cache, unsigned int counter);
 
 

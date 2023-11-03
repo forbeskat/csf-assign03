@@ -5,13 +5,10 @@
 #include <string>
 #include <vector>
 #include <sstream>
-
 using namespace std;
 
 // Note: write = store, read = load
-
 int main(int argc, char **argv) {
-
     if (argc != 7) {
         cerr << "Usage: ./csim num_sets num_blocks num_bytes write/no_write write_through/back eviction" << endl;
         return 1;
@@ -20,7 +17,6 @@ int main(int argc, char **argv) {
     }
 
     Cache cache = init_cache(argv);
-
     unsigned int total_loads = 0;
     unsigned int total_stores = 0;
     unsigned int load_hits = 0;
@@ -31,24 +27,17 @@ int main(int argc, char **argv) {
 
     int sets = stoi(argv[1]);
     int blocks = stoi(argv[2]); // blocks = slotsSize
-    //int bytes_in_block = stoi(argv[3]); // blockSize
     string allocation = argv[4];
     string write_through = argv[5];
     string eviction = argv[6];
-    //int indexSize = log2(sets);
-    //int offsetSize = log2(blocks);
-    //unsigned int tagSize = 32 - indexSize - offsetSize;
-    // unsigned int maxTag = (1 << tagSize) - 1;
-    // unsigned int maxIndex = (1 << indexSize) - 1;
 
     string line;
-
     int counter = 0;
+    
     while(getline(cin, line)) {
         istringstream iss(line);
         string l_or_s;
         unsigned int address;
-        // char r_w;
         unsigned int extra;
         iss >> l_or_s >> std::hex >> address >> extra;
 
@@ -62,7 +51,7 @@ int main(int argc, char **argv) {
             index = 0;
         }   
         
-        total_cycles++;
+        //total_cycles++;
         counter++;
         set_counter(&cache, counter);
 
@@ -77,7 +66,7 @@ int main(int argc, char **argv) {
         } else if (l_or_s == "s"){ // storing
             total_stores++;
             if (slot != NULL) { // memory in cache
-                storeHit(&cache, slot, &total_cycles, counter, &store_hits);
+                storeHit(&cache, slot, &total_cycles, &store_hits);
             } else { //memory not in cache
                 storeMiss(&cache, index, tag, &total_cycles, counter, &store_misses);
             }
