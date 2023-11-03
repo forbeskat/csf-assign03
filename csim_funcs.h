@@ -23,8 +23,8 @@ struct Set {
 
 struct Cache {
     vector<Set> sets;
-    int numslots;
-    int numsets;
+    unsigned int numslots;
+    unsigned int numsets;
     int counter = 0;
     string replacement;
     bool is_write_back = false;
@@ -32,7 +32,7 @@ struct Cache {
 };
 
 /* Check if parameters are valid */
-bool has_invalid_param(int argc, char **argv);
+bool has_invalid_param(char **argv);
 
 /* Used to check if user param is a power of 2 */
 bool not_power_of_two(int num);
@@ -40,16 +40,16 @@ bool not_power_of_two(int num);
 /* Initialize the cache according to the configurations given by user */
 Cache init_cache(char **argv);
 
-Slot* val_trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned int blockSize, unsigned int loopCounter, string eviction);
+Slot* val_trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned int blockSize);
 
 Slot* find_open_slot(Cache *cache, unsigned int index, string replacement);
 
 void loadHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int* load_hits);
 
 // 7 params
-void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* load_misses, string replacement);
+void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* load_misses);
 
-void storeHit(Cache* cache, Slot* slot, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* store_hits);
+void storeHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* store_hits);
 
 void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* store_misses);
 

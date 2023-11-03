@@ -8,9 +8,9 @@
 #include "csim_funcs.h"
 using namespace std;
 
-bool has_invalid_param(int argc, char **argv) {
+bool has_invalid_param(char **argv) {
     int sets = stoi(argv[1]);
-    int blocks = stoi(argv[2]);
+    //int blocks = stoi(argv[2]);
     int bytes_in_block = stoi(argv[3]);
     std::string allocation = argv[4];
     std::string write_through = argv[5];
@@ -54,16 +54,16 @@ bool not_power_of_two(int num) {
 }
 
 Cache init_cache(char **argv) {
-    int sets = stoi(argv[1]);
-    int blocks = stoi(argv[2]); // blocks = slotsSize
-    int bytes_in_block = stoi(argv[3]); // blockSize
+    unsigned int sets = stoi(argv[1]);
+    unsigned int blocks = stoi(argv[2]); // blocks = slotsSize
+    //int bytes_in_block = stoi(argv[3]); // blockSize
     std::string write_allocate = argv[4];
     std::string through_or_back = argv[5];
     std::string eviction = argv[6];
 
-    int indexSize = log2(sets);
-    int offsetSize = log2(blocks);
-    unsigned int tagSize = 32 - indexSize - offsetSize;
+    //int indexSize = log2(sets);
+    //int offsetSize = log2(blocks);
+    //unsigned int tagSize = 32 - indexSize - offsetSize;
 
     Cache cache;
     cache.numslots = stoi(argv[2]);
@@ -85,7 +85,7 @@ Cache init_cache(char **argv) {
 
 
 //return the value of the slot that is a hit if there is a hit
-Slot* val_trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned int blockSize, unsigned int loopCounter, string eviction) {
+Slot* val_trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned int blockSize) {
     for (unsigned int i = 0; i < blockSize; i++) {
         if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
             //cache->sets[index].slots[i].access_ts = loopCounter;
@@ -106,14 +106,14 @@ Slot* find_open_slot(Cache *cache, unsigned int index, string replacement) {
     unsigned int min = UINT_MAX; //represents the minimum timestamp we encounter
     Slot *evict = NULL; //now that we are here we have to find something to evict
     if (replacement == "lru"){
-        for (int i = 0; i < cache->numslots; i++){
-            if (cache->sets[index].slots[i].access_ts < min) {
+        for (unsigned int i = 0; i < cache->numslots; i++){
+            if (cache->sets[index].slots[i].access_ts < min) { //for lru we look at access ts
                 evict = &cache->sets[index].slots[i];
                 min = cache->sets[index].slots[i].access_ts;
             }
         }
     } else { //fifo
-        for (int i = 0; i < cache->numslots; i++){
+        for (unsigned int i = 0; i < cache->numslots; i++){ //for fifo we look at load ts
             if (cache->sets[index].slots[i].load_ts < min) {
                 evict = &cache->sets[index].slots[i];
                 min = cache->sets[index].slots[i].load_ts;
@@ -131,7 +131,7 @@ void loadHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int*
 }
 
 // Load -> memory not found in cache. This means that memory needs to be brought to the cache and then memory needs to be stored to the cache.
-void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* load_misses, string write_through) {
+void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* load_misses) {
     *total_cycles = *total_cycles + (100 * cache->numslots / 4);
     *load_misses = *load_misses + 1;
     Slot* victim = find_open_slot(cache, index, cache->replacement);
@@ -148,16 +148,19 @@ void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* 
 }
 
 // Store -> memory in cache (DONE)
-void storeHit(Cache* cache, Slot* slot, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* store_hits) {
+void storeHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int loopCounter, unsigned int* store_hits) {
     *total_cycles = *total_cycles + 1;
     *store_hits = *store_hits + 1;
 
-    if (!cache->is_write_back) {
+    if (!cache->is_write_back){
         (*total_cycles) += (100);
-    } else { //write-back
-        *total_cycles += 100;
-        slot->dirty = true;
     }
+    // if (cache->is_write_back) {
+    //     (*total_cycles) += (100);
+    //     slot->dirty = true;
+    // } else { //write-through
+    //     (*total_cycles) += (100);
+    // }
 }
 
 // Store -> memory not in cache (NOT DONE!!!!)
@@ -168,19 +171,16 @@ void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int*
         (*total_cycles) += (100);
         // update the cache with new tag, same as LoadMiss
         // write to cache
+        Slot *victim = find_open_slot(cache, index, cache->replacement);
+        victim->access_ts = loopCounter;
+        victim->load_ts = loopCounter;
+        victim->tag = tag;
+        victim->valid = true;
         return;
     } else {
         // (*total_cycles) += (100 * bytes_in_block / 4);
         (*total_cycles) += 1;
-        if(!cache->is_write_back){ //write allocate + write through
-            Slot *victim = find_open_slot(cache, index, cache->replacement);
-            victim->access_ts = loopCounter;
-            victim->load_ts = loopCounter;
-            victim->tag = tag;
-            victim->valid = true;
-
-            (*total_cycles) += 100;
-        } else{ //write allocate + write back
+        if(cache->is_write_back){ //write allocate + write back
             Slot *victim = find_open_slot(cache, index, cache->replacement);
             victim->access_ts = loopCounter;
             victim->load_ts = loopCounter;
@@ -189,6 +189,16 @@ void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int*
 
             victim->dirty = true;
             (*total_cycles) ++;
+
+
+        } else{ //write allocate + write through
+            Slot *victim = find_open_slot(cache, index, cache->replacement);
+            victim->access_ts = loopCounter;
+            victim->load_ts = loopCounter;
+            victim->tag = tag;
+            victim->valid = true;
+
+            (*total_cycles) += 100;
         }
     }
 }

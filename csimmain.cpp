@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
     if (argc != 7) {
         cerr << "Usage: ./csim num_sets num_blocks num_bytes write/no_write write_through/back eviction" << endl;
         return 1;
-    } else if (has_invalid_param(argc, argv)) {
+    } else if (has_invalid_param(argv)) {
         return 2;
     }
 
@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
 
     int sets = stoi(argv[1]);
     int blocks = stoi(argv[2]); // blocks = slotsSize
-    int bytes_in_block = stoi(argv[3]); // blockSize
+    //int bytes_in_block = stoi(argv[3]); // blockSize
     string allocation = argv[4];
     string write_through = argv[5];
     string eviction = argv[6];
@@ -66,18 +66,18 @@ int main(int argc, char **argv) {
         counter++;
         set_counter(&cache, counter);
 
-        Slot* slot = val_trace_is_a_hit(&cache, tag, index, blocks, counter, eviction);
+        Slot* slot = val_trace_is_a_hit(&cache, tag, index, blocks);
         if (l_or_s == "l"){ // loading
             total_loads++;
             if (slot != NULL) { // memory in cache
                 loadHit(&cache, slot, &total_cycles, &load_hits);
             } else { //memory not in cache
-                loadMiss(&cache, index, tag, &total_cycles, counter, &load_misses, write_through);
+                loadMiss(&cache, index, tag, &total_cycles, counter, &load_misses);
             }
         } else if (l_or_s == "s"){ // storing
             total_stores++;
             if (slot != NULL) { // memory in cache
-                storeHit(&cache, slot, index, tag, &total_cycles, counter, &store_hits);
+                storeHit(&cache, slot, &total_cycles, counter, &store_hits);
             } else { //memory not in cache
                 storeMiss(&cache, index, tag, &total_cycles, counter, &store_misses);
             }
