@@ -31,41 +31,17 @@ Lastly, we created a cache with 32 sets containing 8 blocks each, with 32 bytes 
 This is an 8-way set associative cache.
 
 For each cache size, we would compare the different cache configurations for each cache size 
-to determine which version was better. For example, we found that for any of the fully associative 
-caches that the best configuration was sets: 32, blocks: 32, write-through, write-allocate lru, 
-with a miss rate of 0.0000781. 
+to determine which version was better based on miss rate as well as total cycles.
 
-However, we found that out of all of the possible configurations, that the absolute best 
+Conclusion:
+
+We found that out of all of the possible configurations, that the absolute best 
 cache configuration in the context of this assignment was a write-allocate, write-back, and LRU configuration.
 We consistently found that write-allocate, write-back, and LRU was the best or close to the best 
-configuration for the cache. Additionally, we found that a larger cache size with a higher number of sets
-combined with smaller block sizes provide the fastest cache configuration.
+configuration for the cache. Additionally, we found that a fully associative cache was the fastest.
 
 Experimental Results:
-if you scroll further you can find a basic raw summary of all results and the raw output of the script.
-
-
-
-
-
-(Direct Mapped Cache)
-----------------------------------------------------------------------
-Configuration: write-through-no-write-allocate-lru, Miss Rate: 59493
-Configuration: write-through-write-allocate-fifo, Miss Rate: 59115
-Configuration: write-back-no-write-allocate-fifo, Miss Rate: 
-Configuration: write-through-write-allocate-lru, Miss Rate: 59115
-Configuration: write-through-no-write-allocate-fifo, Miss Rate: 59493
-Configuration: write-back-write-allocate-lru, Miss Rate: 59115
-Configuration: write-back-write-allocate-fifo, Miss Rate: 59115
-Configuration: write-back-no-write-allocate-lru, Miss Rate: 
-----------------------------------------------------------------------
-
-(Fully Associative Cache)
-----------------------------------------------------------------------
-
-----------------------------------------------------------------------
-
-
+If you scroll further you can find a basic raw summary of all results and the raw output of the script.
 
 
 .................................................
@@ -76,7 +52,7 @@ summary (config vs miss rate):
 sets: 32, blocks: 4, write-through, write-allocate fifo      miss rate: .0002681
 sets: 1, blocks: 16, write-through, write-allocate lru      miss rate: .0006633
 sets: 1, blocks: 1, write-through, write-allocate fifo      miss rate: .0007873
-sets: 32, blocks: 32, write-through, write-allocate lru      miss rate: .0000781 // lowest miss rate
+sets: 32, blocks: 32, write-through, write-allocate lru      miss rate: .000781 
 sets: 1, blocks: 16, write-back, write-allocate fifo      miss rate: .0006331
 sets: 32, blocks: 8, write-through, no-write allocate lru     miss rate: .0002124
 sets: 1, blocks: 1, write-back, write-allocate lru      miss rate: .0006176
@@ -123,10 +99,10 @@ sets: 32, blocks: 32, write-back, write-allocate lru      miss rate: .0002113
 sets: 32, blocks: 1, write-through, write-allocate fifo      miss rate: .0007155
 sets: 32, blocks: 8, write-back, write-allocate lru      miss rate: .0002740
 sets: 1, blocks: 16, write-back, write-allocate lru      miss rate: .0006771
-sets: 32, blocks: 32, write-through, write-allocate fifo      miss rate: .0000894
-sets: 32, blocks: 16, write-through, write-allocate lru      miss rate: .0000908
+sets: 32, blocks: 32, write-through, write-allocate fifo      miss rate: .000894
+sets: 32, blocks: 16, write-through, write-allocate lru      miss rate: .000908
 sets: 32, blocks: 4, write-through, write-allocate lru      miss rate: .0002227
-sets: 1, blocks: 1, write-back, write-allocate fifo      miss rate: .0006176
+sets: 1, blocks: 1, write-back, write-allocate fifo      miss rate: .00006176
 sets: 32, blocks: 16, write-through, no-write allocate lru     miss rate: .0001846
 sets: 1, blocks: 16, write-through, no-write allocate lru     miss rate: .0008192
 sets: 32, blocks: 32, write-back, write-allocate fifo      miss rate: .0002334
