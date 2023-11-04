@@ -45,7 +45,6 @@ int main(int argc, char **argv) {
         
         counter++;
         cache.counter = counter;
-
         Slot* slot = val_trace_is_a_hit(&cache, tag, index, cache.numslots);
         if (l_or_s == "l"){ // loading
             total_loads++;
@@ -65,6 +64,7 @@ int main(int argc, char **argv) {
             cout << "error: invalid input" << endl;
         }
     }
+    
     //print results
     cout << "Total loads: " << total_loads << endl;
     cout << "Total stores: " << total_stores << endl;

@@ -54,7 +54,6 @@ Cache init_cache(char **argv) {
     return cache;
 }
 
-// if there is a hit, return the slot that is a hit and update its time stamp
 Slot* val_trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, unsigned int blockSize) {
     for (unsigned int i = 0; i < blockSize; i++) {
         if (cache->sets[index].slots[i].valid == true && cache->sets[index].slots[i].tag == tag) {
@@ -65,7 +64,6 @@ Slot* val_trace_is_a_hit(Cache* cache, unsigned int tag, unsigned int index, uns
     return NULL;
 }
 
-//we know that there was not a hit. so we need to find an open slot in the set. first check if any with valid = false. if not then just evict something
 Slot* find_open_slot(Cache *cache, unsigned int index, string replacement) {
     for (unsigned int i = 0; i < cache->numslots; i++){
         if (!(cache->sets[index].slots[i].valid)){
@@ -92,59 +90,53 @@ Slot* find_open_slot(Cache *cache, unsigned int index, string replacement) {
     return evict;
 }
 
-// Load -> memory found in cache. We just need to uupdate load hits and total cycles.
 void loadHit( unsigned int* total_cycles, unsigned int* load_hits) {
     *load_hits = *load_hits + 1;
-    *total_cycles = *total_cycles + 1;
+    *total_cycles = *total_cycles + 1; //loads/stores from/to the cache take one processor cycle
 }
 
-// Load -> memory not found in cache. This means that memory needs to be brought to the cache and then memory needs to be stored to the cache.
 void loadMiss(Cache* cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int* load_misses) {
-    *total_cycles = *total_cycles + (100 * cache->numbytes / 4);
+    *total_cycles = *total_cycles + (100 * cache->numbytes / 4); //loads/stores from/to memory take 100 processor cycles for each 4-byte quantity that is transferred
     *load_misses = *load_misses + 1;
     Slot* victim = find_open_slot(cache, index, cache->replacement);
-
     if (victim->valid && cache->is_write_back && victim->dirty) {
-        *total_cycles = *total_cycles + (100 * cache->numbytes / 4);
+        *total_cycles = *total_cycles + (100 * cache->numbytes / 4); // cost of writing back dirty block
     }
-    reassign(cache, victim, tag);
+    reassign(cache, victim, tag); //we know there was no hit, so we need to add it to the cache
 }
 
-// Store -> memory found in cache. update store hits and handle dirty/total cycles based on provided parameters.
 void storeHit(Cache* cache, Slot* slot, unsigned int* total_cycles, unsigned int* store_hits) {
     *store_hits = *store_hits + 1;
     if (!cache->is_write_allocate && !cache->is_write_back) {
-        *total_cycles = *total_cycles + 100;
+        *total_cycles = *total_cycles + 100; //cost of write-through to memory
     } else if (cache->is_write_allocate && !cache->is_write_back) {
         slot->dirty = true;
-        *total_cycles = *total_cycles + 100;
+        *total_cycles = *total_cycles + 100; //cost of write-through to memory
     } else {
         slot->dirty = true;
-        *total_cycles = *total_cycles + 1;
+        *total_cycles = *total_cycles + 1; //loads/stores from/to the cache take one processor cycle
     }
 }
 
-// Store -> memory not found in cache. update store misses and handle adding a new element/dirty/total cycles based on provided parameters.
 void storeMiss(Cache *cache, unsigned int index, unsigned int tag, unsigned int* total_cycles, unsigned int* store_misses) {
     *store_misses = *store_misses + 1;
-    
     if (!cache->is_write_allocate && !cache->is_write_back) { // No-write-allocate + write-through
-        *total_cycles = *total_cycles + 100;
+        *total_cycles = *total_cycles + 100; //cost of write-through to memory
         return; // Do nothing
     }
-    
+    //write-allcoate: we know there was no hit, so we need to add it to the cache
     Slot *slot = find_open_slot(cache, index, cache->replacement);
-    *total_cycles = *total_cycles + (100 * cache->numbytes / 4);// cost of loading block
+    *total_cycles = *total_cycles + (100 * cache->numbytes / 4);//loads/stores from/to memory take 100 processor cycles for each 4-byte quantity that is transferred
     if (slot->valid && cache->is_write_back && slot->dirty) {
         *total_cycles = *total_cycles + (100 * cache->numbytes / 4); // cost of writing back dirty block
     }
     if (cache->is_write_allocate && !cache->is_write_back) { // Write-allocate + write-through
         reassign(cache, slot, tag);
-        *total_cycles = *total_cycles + 100;
+        *total_cycles = *total_cycles + 100; //cost of write-through to memory
     } else { // Write-allocate + write-back
         reassign(cache, slot, tag);
         slot->dirty = true;
-        *total_cycles = *total_cycles + 1;
+        *total_cycles = *total_cycles + 1; //loads/stores from/to the cache take one processor cycle
     }
 } 
 
