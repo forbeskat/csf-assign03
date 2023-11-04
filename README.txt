@@ -18,7 +18,8 @@ Dave Hovenmeyer - changed 2 variable names that +40'ed the autograder, alleviate
 ####################################################################################################
 
 For our experiments, we essentially created caches with all possible combinations for the configurations of the same size cache 
-for multiple cache sizes. 
+for multiple cache sizes. To find the best configuration, we must consider the drawbacks of fully associative caches (infeasible 
+hardware requirements) and direct mapped caches (high miss rate) to find an equilbrium between cycle counts and overhead.
 
 We start with a cache with an arbitrary block size, and created a cache with 32 sets containing 1 block each,
 with 32 bytes per block. This is a direct mapped cache.
@@ -31,17 +32,17 @@ This is an 8-way set associative cache.
 
 For each cache size, we would compare the different cache configurations for each cache size 
 to determine which version was better. For example, we found that for any of the fully associative 
-caches that the best configuration was *ENTER HERE*, with a hit rate of *ENTER HERE*. 
+caches that the best configuration was sets: 32, blocks: 32, write-through, write-allocate lru, 
+with a miss rate of 0.0000781. 
 
 However, we found that out of all of the possible configurations, that the absolute best 
-cache configuration in the context of this assignment was *ENTER HERE*
+cache configuration in the context of this assignment was a write-allocate, write-back, and LRU configuration.
+We consistently found that write-allocate, write-back, and LRU was the best or close to the best 
+configuration for the cache. Additionally, we found that a larger cache size with a higher number of sets
+combined with smaller block sizes provide the fastest cache configuration.
 
 Experimental Results:
 if you scroll further you can find a basic raw summary of all results and the raw output of the script.
-
-
-
-
 
 
 
@@ -75,7 +76,7 @@ summary (config vs miss rate):
 sets: 32, blocks: 4, write-through, write-allocate fifo      miss rate: .0002681
 sets: 1, blocks: 16, write-through, write-allocate lru      miss rate: .0006633
 sets: 1, blocks: 1, write-through, write-allocate fifo      miss rate: .0007873
-sets: 32, blocks: 32, write-through, write-allocate lru      miss rate: .0000781
+sets: 32, blocks: 32, write-through, write-allocate lru      miss rate: .0000781 // lowest miss rate
 sets: 1, blocks: 16, write-back, write-allocate fifo      miss rate: .0006331
 sets: 32, blocks: 8, write-through, no-write allocate lru     miss rate: .0002124
 sets: 1, blocks: 1, write-back, write-allocate lru      miss rate: .0006176
@@ -1020,13 +1021,5 @@ sets: 32, blocks: 1, write-through, no-write allocate lru     miss rate: .000880
 sets: 1, blocks: 8, write-back, no-write allocate fifo     miss rate: 
 sets: 32, blocks: 8, write-through, write-allocate lru      miss rate: .0001198
 sets: 32, blocks: 16, write-back, write-allocate lru      miss rate: .0002253
-[awang105@ugrad17 csf-assign03]$ 
-Katherine - *.cpp and *.h
-Annie - csim.cpp
 
-Milestone 3:
-
-Katherine and Annie contributed equally to all functions in csim_funcs and contributed to debugging.
-
-Experiments:
 
