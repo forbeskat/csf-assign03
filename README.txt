@@ -1021,3 +1021,12 @@ sets: 1, blocks: 8, write-back, no-write allocate fifo     miss rate:
 sets: 32, blocks: 8, write-through, write-allocate lru      miss rate: .0001198
 sets: 32, blocks: 16, write-back, write-allocate lru      miss rate: .0002253
 [awang105@ugrad17 csf-assign03]$ 
+Katherine - *.cpp and *.h
+Annie - csim.cpp
+
+Milestone 3:
+
+Katherine and Annie contributed equally to all functions in csim_funcs and contributed to debugging.
+
+Experiments:
+
